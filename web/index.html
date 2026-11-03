@@ -50,11 +50,15 @@
 
   .searchwrap{position:sticky; top:65px; z-index:35; background:var(--bg); padding:12px clamp(14px,3vw,28px); border-bottom:1px solid var(--border)}
   .searchwrap .inner{max-width:1180px; margin:0 auto; position:relative}
-  .search{width:100%; height:52px; border-radius:14px; border:1.5px solid var(--border-strong); background:var(--surface); padding:0 46px; font-size:15px; color:var(--ink); font-family:inherit; box-shadow:var(--shadow-sm)}
+  .search{width:100%; height:52px; border-radius:14px; border:1.5px solid var(--border-strong); background:var(--surface); padding:0 80px 0 46px; font-size:15px; color:var(--ink); font-family:inherit; box-shadow:var(--shadow-sm)}
   .search:focus{outline:none; border-color:var(--primary); box-shadow:0 0 0 4px var(--primary-soft)}
   .search-ico{position:absolute; left:16px; top:26px; transform:translateY(-50%); color:var(--primary); font-size:18px}
   .search-clear{position:absolute; right:12px; top:26px; transform:translateY(-50%); border:0; background:var(--surface-2); color:var(--muted); width:26px; height:26px; border-radius:50%; display:none; place-items:center}
   .search-clear.show{display:grid}
+  .mic-btn{position:absolute; right:42px; top:26px; transform:translateY(-50%); border:0; background:none; color:var(--muted); width:30px; height:30px; border-radius:50%; display:grid; place-items:center; font-size:16px; cursor:pointer; transition:color .15s,background .15s}
+  .mic-btn:hover{color:var(--primary); background:var(--primary-soft)}
+  .mic-btn.listening{color:#fff; background:var(--crit); animation:pulse 1s ease-in-out infinite}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(244,63,94,.4)} 50%{box-shadow:0 0 0 8px rgba(244,63,94,0)}}
   .aclist{position:absolute; left:0; right:0; top:58px; background:var(--surface); border:1px solid var(--border); border-radius:14px; box-shadow:var(--shadow-md); overflow:hidden; display:none; z-index:50}
   .aclist.show{display:block}
   .acrow{display:flex; align-items:center; gap:12px; padding:10px 14px; cursor:pointer}
@@ -159,6 +163,7 @@
     <div class="inner">
       <span class="search-ico">🔍</span>
       <input class="search" id="search" autocomplete="off" aria-label="Search" placeholder="Search for products" />
+      <button class="mic-btn" id="micBtn" aria-label="Voice search" title="Voice search">🎤</button>
       <button class="search-clear" id="searchClear" aria-label="Clear">✕</button>
       <div class="aclist" id="aclist"></div>
     </div>
@@ -326,6 +331,26 @@ let searchT;
 $("#search").addEventListener("input",(e)=>{STATE.query=e.target.value.trim();$("#searchClear").classList.toggle("show",!!STATE.query);clearTimeout(searchT);searchT=setTimeout(()=>{doSearch();autocomplete(STATE.query);},260);});
 $("#search").addEventListener("keydown",(e)=>{if(e.key==="Enter"){e.preventDefault();clearTimeout(searchT);$("#aclist").classList.remove("show");doSearch();}});
 $("#search").addEventListener("blur",()=>setTimeout(()=>$("#aclist").classList.remove("show"),200));
+
+// voice search
+const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+if(SpeechRecognition){
+  const mic=$("#micBtn"); let recognition=null; let listening=false;
+  mic.onclick=()=>{
+    if(listening){recognition.stop();return;}
+    recognition=new SpeechRecognition();
+    recognition.lang="hi-IN"; recognition.interimResults=true; recognition.maxAlternatives=1;
+    recognition.onstart=()=>{listening=true;mic.classList.add("listening");$("#search").placeholder="Bol rahe ho... 🎤";};
+    recognition.onresult=(e)=>{
+      const transcript=[...e.results].map(r=>r[0].transcript).join("");
+      $("#search").value=transcript; STATE.query=transcript; $("#searchClear").classList.add("show");
+      if(e.results[e.results.length-1].isFinal){recognition.stop();doSearch();}
+    };
+    recognition.onend=()=>{listening=false;mic.classList.remove("listening");$("#search").placeholder="Search for products";};
+    recognition.onerror=(e)=>{listening=false;mic.classList.remove("listening");$("#search").placeholder="Search for products";if(e.error!=="aborted")toast("Voice not available — try typing");};
+    recognition.start();
+  };
+}else{$("#micBtn").style.display="none";}
 $("#searchClear").onclick=()=>{$("#search").value="";STATE.query="";$("#searchClear").classList.remove("show");$("#aclist").classList.remove("show");doSearch();$("#search").focus();};
 $("#locBtn").onclick=openModal;$("#cartBtn").onclick=openDrawer;$("#cartbarGo").onclick=openDrawer;$("#cartClose").onclick=closeModal;$("#scrim").onclick=closeModal;$("#pinCheck").onclick=checkPin;$("#pinInput").addEventListener("keydown",(e)=>{if(e.key==="Enter")checkPin();});
 $("#placeOrder").onclick=()=>{if(cartArr().length===0){toast("Cart khaali hai");return;}STATE.cart={};saveCart();renderCart();closeModal();toast("Order placed — arriving in 10 min! 🎉");doSearch();};
