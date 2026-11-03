@@ -335,19 +335,25 @@ $("#search").addEventListener("blur",()=>setTimeout(()=>$("#aclist").classList.r
 // voice search
 const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
 if(SpeechRecognition){
-  const mic=$("#micBtn"); let recognition=null; let listening=false;
+  const mic=$("#micBtn"); let recognition=null; let listening=false; let hasSearched=false;
   mic.onclick=()=>{
     if(listening){recognition.stop();return;}
     recognition=new SpeechRecognition();
-    recognition.lang="hi-IN"; recognition.interimResults=true; recognition.maxAlternatives=1;
-    recognition.onstart=()=>{listening=true;mic.classList.add("listening");$("#search").placeholder="Bol rahe ho... 🎤";};
+    recognition.lang="hi-IN"; recognition.continuous=true; recognition.interimResults=true; recognition.maxAlternatives=3;
+    hasSearched=false;
+    recognition.onstart=()=>{listening=true;mic.classList.add("listening");$("#search").placeholder="Bolo... 🎤";};
     recognition.onresult=(e)=>{
-      const transcript=[...e.results].map(r=>r[0].transcript).join("");
-      $("#search").value=transcript; STATE.query=transcript; $("#searchClear").classList.add("show");
-      if(e.results[e.results.length-1].isFinal){recognition.stop();doSearch();}
+      let final="",interim="";
+      for(let i=0;i<e.results.length;i++){if(e.results[i].isFinal)final+=e.results[i][0].transcript;else interim+=e.results[i][0].transcript;}
+      const text=(final+interim).trim();
+      $("#search").value=text; STATE.query=text; $("#searchClear").classList.add("show");
+      if(final){hasSearched=true;recognition.stop();doSearch();}
     };
-    recognition.onend=()=>{listening=false;mic.classList.remove("listening");$("#search").placeholder="Search for products";};
-    recognition.onerror=(e)=>{listening=false;mic.classList.remove("listening");$("#search").placeholder="Search for products";if(e.error!=="aborted")toast("Voice not available — try typing");};
+    recognition.onend=()=>{
+      listening=false;mic.classList.remove("listening");$("#search").placeholder="Search for products";
+      if(!hasSearched&&STATE.query.trim()){doSearch();}
+    };
+    recognition.onerror=(e)=>{listening=false;mic.classList.remove("listening");$("#search").placeholder="Search for products";if(e.error!=="aborted"&&e.error!=="no-speech")toast("Voice not available — try typing");};
     recognition.start();
   };
 }else{$("#micBtn").style.display="none";}
