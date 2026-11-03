@@ -1,0 +1,22 @@
+{
+  "name": "zepkit",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Blinkit-style multilingual semantic search (Express + Kafka + TypeSense + Redis + MongoDB + Ollama)",
+  "workspaces": [
+    "packages/*",
+    "services/*"
+  ],
+  "scripts": {
+    "infra:up": "docker compose up -d",
+    "infra:down": "docker compose down",
+    "infra:logs": "docker compose logs -f",
+    "dev:ai": "npm --workspace services/ai-service run dev",
+    "dev:api": "npm --workspace services/api-gateway run dev",
+    "dev:worker": "npm --workspace services/worker run dev"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

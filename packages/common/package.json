@@ -1,0 +1,16 @@
+{
+  "name": "@zepkit/common",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "ioredis": "^5.4.1",
+    "kafkajs": "^2.2.4",
+    "mongodb": "^6.9.0",
+    "typesense": "^1.8.2"
+  }
+}

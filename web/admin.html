@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ZepKit Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#f7f6ff; --surface:#ffffff; --surface-2:#f1edff; --surface-3:#e6defb;
+    --ink:#1a123a; --muted:#6b6392; --faint:#9890bf;
+    --border:#ebe6fb; --border-strong:#d9d0f6;
+    --primary:#6d28d9; --primary-ink:#5b21b6; --primary-soft:#ede9fe;
+    --veg:#15a34a; --warn:#c77d12; --crit:#f43f5e;
+    --c1:#6d28d9; --c2:#f59e0b; --c3:#10b981;
+    --shadow-sm:0 1px 2px rgba(80,40,160,.07),0 2px 12px rgba(100,50,200,.07);
+    --shadow-md:0 8px 22px rgba(100,50,200,.16),0 18px 48px rgba(100,50,200,.12);
+    --radius:14px;
+  }
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;
+    --bg:#130c29; --surface:#1c1443; --surface-2:#271c58; --surface-3:#32266e;
+    --ink:#efeaff; --muted:#b0a6da; --faint:#7d72ac; --border:#2e2360; --border-strong:#413487;
+    --primary:#a78bfa; --primary-ink:#ddd0ff; --primary-soft:#2b1f60; --veg:#45c46e;
+    --shadow-sm:0 1px 2px rgba(0,0,0,.4); --shadow-md:0 10px 26px rgba(0,0,0,.5);}}
+  :root[data-theme="dark"]{color-scheme:dark;
+    --bg:#130c29; --surface:#1c1443; --surface-2:#271c58; --surface-3:#32266e;
+    --ink:#efeaff; --muted:#b0a6da; --faint:#7d72ac; --border:#2e2360; --border-strong:#413487;
+    --primary:#a78bfa; --primary-ink:#ddd0ff; --primary-soft:#2b1f60; --veg:#45c46e;
+    --shadow-sm:0 1px 2px rgba(0,0,0,.4); --shadow-md:0 10px 26px rgba(0,0,0,.5);}
+
+  *{box-sizing:border-box} html,body{margin:0; height:100%}
+  body{background:var(--bg); color:var(--ink); font-family:"Plus Jakarta Sans",system-ui,sans-serif; line-height:1.5; -webkit-font-smoothing:antialiased; display:flex; min-height:100%}
+  h1,h2,h3{font-family:"Outfit",sans-serif; margin:0} button{font-family:inherit; cursor:pointer} .num{font-variant-numeric:tabular-nums}
+
+  /* sidebar */
+  aside{width:230px; flex:none; background:var(--surface); border-right:1px solid var(--border); padding:18px 14px; display:flex; flex-direction:column; position:sticky; top:0; height:100vh}
+  .brand{display:flex; align-items:center; gap:8px; font-family:"Outfit"; font-weight:800; font-size:20px; color:var(--primary); padding:4px 8px 16px}
+  .brand .dot{width:11px;height:11px;border-radius:50%;background:var(--primary);box-shadow:0 0 0 4px var(--primary-soft)} .brand b{color:var(--ink)} .brand .t{font-size:12px;color:var(--muted);font-weight:600;font-family:"Plus Jakarta Sans"}
+  nav{display:flex; flex-direction:column; gap:3px}
+  .nav{display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:11px; border:0; background:none; color:var(--muted); font-size:14px; font-weight:600; text-align:left; width:100%}
+  .nav:hover{background:var(--surface-2); color:var(--ink)}
+  .nav[aria-selected="true"]{background:var(--primary); color:#fff}
+  .nav .i{font-size:16px; width:18px; text-align:center}
+  .side-foot{margin-top:auto; padding:10px 8px; font-size:12px; color:var(--faint); display:flex; flex-direction:column; gap:6px}
+  .side-foot a{color:var(--primary); text-decoration:none}
+
+  main{flex:1; padding:24px clamp(16px,3vw,34px); overflow-x:hidden}
+  .head{display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; flex-wrap:wrap; gap:12px}
+  .head h1{font-size:24px; font-weight:800; letter-spacing:-.02em}
+  .head .sub{color:var(--muted); font-size:13px; margin-top:2px}
+  select,input[type=text],input[type=number]{height:42px; border-radius:10px; border:1.5px solid var(--border-strong); background:var(--bg); padding:0 12px; font-size:14px; color:var(--ink); font-family:inherit}
+  select:focus,input:focus{outline:none; border-color:var(--primary); box-shadow:0 0 0 3px var(--primary-soft)}
+  .btn{height:42px; border-radius:11px; border:0; background:var(--primary); color:#fff; font-family:"Outfit"; font-weight:700; font-size:14px; padding:0 18px; transition:background .15s, transform .1s}
+  .btn:hover{background:var(--primary-ink)} .btn:active{transform:scale(.98)}
+  .btn.sec{background:var(--surface-2); color:var(--primary-ink)} .btn.sm{height:36px; font-size:13px; padding:0 13px}
+  .btn.ai{background:var(--veg)} .btn.ai:hover{filter:brightness(.95)}
+
+  .panel{display:none} .panel.show{display:block}
+  .card{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow-sm); padding:18px; margin-bottom:16px}
+  label{display:block; font-size:11.5px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; margin-bottom:6px}
+
+  /* overview tiles */
+  .tiles{display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:14px; margin-bottom:16px}
+  .tile{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:16px 18px; box-shadow:var(--shadow-sm)}
+  .tile .k{font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; font-weight:700}
+  .tile .n{font-family:"Outfit"; font-weight:800; font-size:30px; margin-top:6px; letter-spacing:-.02em}
+  .tile .n.good{color:var(--veg)} .tile .n.bad{color:var(--crit)}
+  .grid2{display:grid; grid-template-columns:1.5fr 1fr; gap:16px} @media(max-width:860px){.grid2{grid-template-columns:1fr}}
+  .barrow{display:flex; align-items:center; gap:10px; padding:7px 0}
+  .barrow .nm{width:180px; font-size:13px; color:var(--muted); flex:none; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .barrow .bar{flex:1; height:12px; background:var(--surface-2); border-radius:999px; overflow:hidden}
+  .barrow .bar i{display:block; height:100%; background:var(--primary); border-radius:999px}
+  .barrow .c{font-family:"Outfit"; font-weight:700; min-width:28px; text-align:right; font-size:13px}
+  .lrow{display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid var(--border); font-size:14px}
+  .lrow .q{flex:1; font-weight:600} .lrow .c{font-family:"Outfit"; font-weight:700}
+  .muted{color:var(--muted); font-size:13px}
+
+  /* add product */
+  .addgrid{display:grid; grid-template-columns:1fr 1.15fr; gap:16px; align-items:start} @media(max-width:920px){.addgrid{grid-template-columns:1fr}}
+  .field{margin-bottom:14px} .field input,.field select{width:100%}
+  .row{display:flex; gap:12px} .row>*{flex:1}
+  .stores{display:flex; flex-wrap:wrap; gap:8px}
+  .stchk{display:flex; align-items:center; gap:7px; padding:8px 12px; border:1px solid var(--border); border-radius:10px; font-size:13px; font-weight:600; cursor:pointer}
+  .stchk input{width:16px; height:16px; accent-color:var(--primary)}
+  .stchk.on{border-color:var(--primary); background:var(--primary-soft); color:var(--primary-ink)}
+  .vegtoggle{display:inline-flex; border:1px solid var(--border-strong); border-radius:10px; overflow:hidden}
+  .vegtoggle button{height:42px; padding:0 16px; border:0; background:var(--bg); color:var(--muted); font-weight:700; font-size:13px}
+  .vegtoggle button[aria-pressed="true"]{background:var(--veg); color:#fff}
+
+  .tagmeta{font-size:12.5px; color:var(--muted); margin:2px 0 12px}
+  .langrow{display:grid; grid-template-columns:96px 1fr; gap:10px; padding:9px 0; border-bottom:1px solid var(--border); align-items:start}
+  .langrow .lang{font-size:12.5px; font-weight:700; color:var(--muted); padding-top:7px}
+  .chips{display:flex; flex-wrap:wrap; gap:6px; align-items:center}
+  .ch{display:inline-flex; align-items:center; gap:6px; padding:5px 9px; border-radius:999px; background:var(--primary-soft); color:var(--primary-ink); font-size:12.5px; font-weight:600}
+  .ch button{border:0; background:none; color:inherit; font-size:13px; opacity:.6; padding:0} .ch button:hover{opacity:1}
+  .ch.other{background:var(--surface-2); color:var(--muted)}
+  .chadd{border:0; background:none; color:var(--faint); font-size:12.5px; width:90px; outline:none}
+
+  .toast{position:fixed; left:50%; bottom:28px; transform:translateX(-50%) translateY(20px); z-index:80; background:var(--ink); color:var(--bg); padding:12px 20px; border-radius:12px; font-weight:600; font-size:14px; opacity:0; pointer-events:none; transition:opacity .22s, transform .22s; box-shadow:var(--shadow-md)}
+  .toast.show{opacity:1; transform:translateX(-50%)}
+  .mapbox{display:none; gap:8px; flex-direction:column; width:100%; margin-top:6px} .mapbox.show{display:flex}
+  .mapres{display:flex; flex-wrap:wrap; gap:6px} .mapres button{border:1px solid var(--border); background:var(--surface-2); border-radius:8px; padding:6px 10px; font-size:12.5px; color:var(--ink); font-weight:600} .mapres button:hover{border-color:var(--primary); color:var(--primary)}
+  .miss{display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid var(--border); flex-wrap:wrap}
+  .miss .q{flex:1; font-weight:700; min-width:110px} .miss .cnt{font-size:12px; color:var(--crit); font-weight:700; background:color-mix(in srgb,var(--crit) 12%,transparent); padding:2px 8px; border-radius:999px}
+  .gate{position:fixed; inset:0; z-index:200; background:var(--bg); display:none; place-items:center; padding:20px}
+  .gate.show{display:grid}
+  .gatebox{width:min(400px,92vw); background:var(--surface); border:1px solid var(--border); border-radius:18px; box-shadow:var(--shadow-md); padding:30px 28px; text-align:center}
+  .gatebox .brand{justify-content:center; padding:0 0 12px; display:flex; align-items:center; gap:8px; font-family:"Outfit"; font-weight:800; font-size:20px; color:var(--primary)}
+  .gatebox h2{font-size:22px; margin:4px 0} .gatebox p{color:var(--muted); font-size:13.5px; margin:0 0 18px}
+  .gatebox input{width:100%; height:48px; text-align:center; margin-bottom:10px}
+  .gatemsg{font-size:13px; min-height:1.2em; margin-bottom:10px; color:var(--muted)} .gatemsg.err{color:var(--crit)}
+  .gatebox .btn{width:100%; height:48px} .gatehint{font-size:11.5px; color:var(--faint); margin-top:14px} .gatehint code{background:var(--surface-2); padding:1px 6px; border-radius:5px; color:var(--primary-ink)}
+</style>
+</head>
+<body>
+  <aside>
+    <div class="brand"><span class="dot"></span><span>zep<b>kit</b></span> <span class="t">admin</span></div>
+    <nav>
+      <button class="nav" data-v="overview" aria-selected="true"><span class="i">▦</span> Overview</button>
+      <button class="nav" data-v="add"><span class="i">＋</span> Add product</button>
+      <button class="nav" data-v="searches"><span class="i">🔍</span> Searches</button>
+      <button class="nav" data-v="locations"><span class="i">📍</span> Locations</button>
+    </nav>
+    <div class="side-foot">
+      <a href="/" target="_blank">Open the shop ↗</a>
+      <span id="keyStatus">No admin key yet</span>
+      <a href="#" id="signout" style="display:none">Sign out</a>
+    </div>
+  </aside>
+
+  <main>
+    <!-- OVERVIEW -->
+    <section class="panel show" id="v-overview">
+      <div class="head">
+        <div><h1>Overview</h1><div class="sub">Live search analytics across your dark stores.</div></div>
+        <div style="display:flex;gap:8px"><select id="aStore"><option value="">All stores</option></select><button class="btn sm" id="refresh">Refresh</button></div>
+      </div>
+      <div class="tiles" id="tiles"></div>
+      <div class="grid2">
+        <div class="card"><label>Searches by script</label><div id="scriptBars"></div></div>
+        <div class="card"><label>Searches per day</label><div id="perDay"></div></div>
+      </div>
+      <div class="card"><label>Top searches</label><div id="topList"></div></div>
+    </section>
+
+    <!-- ADD PRODUCT -->
+    <section class="panel" id="v-add">
+      <div class="head"><div><h1>Add product</h1><div class="sub">Type a name — tags in 14 languages are generated instantly.</div></div></div>
+      <div class="addgrid">
+        <div class="card">
+          <div class="field"><label>Name *</label><input type="text" id="name" placeholder="e.g. Tata Salt 1kg" autocomplete="off" /></div>
+          <div class="field"><label>Brand</label><input type="text" id="brand" placeholder="auto-detected" /></div>
+          <div class="row field">
+            <div><label>Category *</label><select id="category"></select></div>
+            <div><label>Veg / Non-veg</label><div class="vegtoggle"><button id="vegYes" aria-pressed="true">● Veg</button><button id="vegNo" aria-pressed="false">● Non-veg</button></div></div>
+          </div>
+          <div class="row field">
+            <div><label>Size / pack</label><input type="text" id="size" placeholder="1kg" /></div>
+            <div><label>MRP ₹</label><input type="number" id="mrp" placeholder="0" min="0" /></div>
+          </div>
+          <div class="field"><label>In stock in (dark stores)</label><div class="stores" id="stores"></div></div>
+          <button class="btn" id="save" style="width:100%">⬆ Save product</button>
+        </div>
+        <div class="card">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+            <label style="margin:0">Search tags</label>
+            <div style="display:flex;gap:8px"><button class="btn sec sm" id="quick">⚡ Quick tags (rules)</button><button class="btn ai sm" id="genai">✦ Generate with AI</button></div>
+          </div>
+          <div class="tagmeta" id="tagMeta">Type a product name to generate tags.</div>
+          <div id="langRows"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SEARCHES -->
+    <section class="panel" id="v-searches">
+      <div class="head"><div><h1>Searches</h1><div class="sub">What shoppers look for — and what they couldn’t find.</div></div>
+        <select id="sStore"><option value="">All stores</option></select></div>
+      <div class="card"><label>Missed searches — demand signals</label><div class="muted" style="margin-bottom:6px">Map a missed query to a product (adds it as an alias, re-indexes).</div><div id="missList"></div></div>
+      <div class="card"><label>Top searches</label><div id="topList2"></div></div>
+    </section>
+
+    <!-- LOCATIONS -->
+    <section class="panel" id="v-locations">
+      <div class="head"><div><h1>Locations</h1><div class="sub">Dark stores and the pincodes they serve.</div></div></div>
+      <div class="card"><div id="locList"></div></div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <div class="gate" id="gate">
+    <div class="gatebox">
+      <div class="brand"><span class="dot" style="width:11px;height:11px;border-radius:50%;background:var(--primary);box-shadow:0 0 0 4px var(--primary-soft)"></span><span>zep<b style="color:var(--ink)">kit</b></span></div>
+      <h2>Admin access</h2>
+      <p>Enter your admin key to manage products and view analytics.</p>
+      <input id="gateKey" type="password" placeholder="admin key" autocomplete="off" />
+      <div class="gatemsg" id="gateMsg"></div>
+      <button class="btn" id="gateBtn">Unlock →</button>
+      <div class="gatehint">Dev key: <code>zepkit-admin-2024</code> · set <code>ADMIN_KEY</code> env to change</div>
+    </div>
+  </div>
+
+<script>
+const $=(s)=>document.querySelector(s); const $$=(s)=>[...document.querySelectorAll(s)];
+let STORES=[], CATS=[], BYLANG={}, VEG=true;
+let ADMIN_KEY=localStorage.getItem("zk_admin_key")||"";
+async function api(p,o={}){ const headers={...(o.headers||{})}; if(ADMIN_KEY) headers["X-Admin-Key"]=ADMIN_KEY; const r=await fetch(p,{...o,headers}); if(r.status===401){ showGate(); throw new Error("admin key required"); } if(!r.ok) throw new Error((await r.json().catch(()=>({}))).error||r.status); return r.json(); }
+async function verifyKey(key){ try{ const r=await fetch("/admin/verify",{headers:{"X-Admin-Key":key}}); return r.ok; }catch{ return false; } }
+function showGate(){ $("#gate").classList.add("show"); }
+function hideGate(){ $("#gate").classList.remove("show"); }
+function updateKeyStatus(ok){ $("#keyStatus").textContent=ok?"🔑 Admin key saved":"No admin key yet"; $("#signout").style.display=ok?"inline":"none"; }
+let tT; function toast(m){ const t=$("#toast"); t.textContent=m; t.classList.add("show"); clearTimeout(tT); tT=setTimeout(()=>t.classList.remove("show"),2400); }
+
+// nav
+$$(".nav").forEach(b=>b.onclick=()=>{ const v=b.dataset.v; $$(".nav").forEach(n=>n.setAttribute("aria-selected",n===b)); $$(".panel").forEach(p=>p.classList.remove("show")); $("#v-"+v).classList.add("show"); if(v==="overview") loadOverview(); if(v==="searches") loadSearches(); if(v==="locations") loadLocations(); if(v==="add") initAdd(); });
+
+// ---------- overview ----------
+$("#refresh").onclick=loadOverview; $("#aStore").onchange=loadOverview;
+async function loadOverview(){
+  let d; try{ d=await api(`/admin/analytics${$("#aStore").value?`?store=${$("#aStore").value}`:""}`);}catch(e){ toast("Analytics: "+e.message); return; }
+  $("#tiles").innerHTML="";
+  const tiles=[["Searches",d.total],["Unique queries",d.unique],["Zero-result rate",d.zeroRate+"%", d.zeroRate>0?"bad":"good"],["Click rate (CTR)",d.ctr+"%"],["Adds to cart",d.adds],["Missed queries",d.missedCount,d.missedCount>0?"bad":"good"]];
+  tiles.forEach(([k,n,cls])=>{ const t=document.createElement("div"); t.className="tile"; t.innerHTML=`<div class="k">${k}</div><div class="n ${cls||""}">${n}</div>`; $("#tiles").appendChild(t); });
+  const smax=Math.max(1,...d.byScript.map(s=>s.count));
+  $("#scriptBars").innerHTML = d.byScript.length? "" : `<div class="muted">No searches yet.</div>`;
+  d.byScript.forEach(s=>{ const r=document.createElement("div"); r.className="barrow"; r.innerHTML=`<span class="nm">${s.name}</span><span class="bar"><i style="width:${Math.round(s.count/smax*100)}%"></i></span><span class="c num">${s.count}</span>`; $("#scriptBars").appendChild(r); });
+  $("#perDay").innerHTML = perDaySvg(d.perDay);
+  const tmax=Math.max(1,...d.top.map(t=>t.count));
+  $("#topList").innerHTML = d.top.length? "" : `<div class="muted">No searches yet — try the shop.</div>`;
+  d.top.forEach(t=>{ const r=document.createElement("div"); r.className="barrow"; r.innerHTML=`<span class="nm">${t.query}</span><span class="bar"><i style="width:${Math.round(t.count/tmax*100)}%"></i></span><span class="c num">${t.count}</span>`; $("#topList").appendChild(r); });
+}
+function perDaySvg(days){
+  if(!days.length) return `<div class="muted">No data yet.</div>`;
+  const W=520,H=150,P=24; const max=Math.max(1,...days.map(d=>Math.max(d.searches,d.adds)));
+  const x=i=>P+i*((W-2*P)/Math.max(1,days.length-1)); const y=v=>H-P-(v/max)*(H-2*P);
+  const line=(key,col)=>days.map((d,i)=>`${i?"L":"M"}${x(i).toFixed(1)},${y(d[key]).toFixed(1)}`).join(" ");
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" style="overflow:visible"><path d="${line("searches")}" fill="none" stroke="var(--c1)" stroke-width="2.5"/><path d="${line("adds")}" fill="none" stroke="var(--c3)" stroke-width="2.5"/>${days.map((d,i)=>`<circle cx="${x(i)}" cy="${y(d.searches)}" r="3" fill="var(--c1)"/>`).join("")}<text x="${P}" y="${H-4}" font-size="10" fill="var(--muted)">${days[0].day.slice(5)}</text><text x="${W-P}" y="${H-4}" font-size="10" fill="var(--muted)" text-anchor="end">${days[days.length-1].day.slice(5)}</text></svg><div class="muted" style="margin-top:4px"><span style="color:var(--c1)">● searches</span> &nbsp; <span style="color:var(--c3)">● adds</span></div>`;
+}
+
+// ---------- add product ----------
+async function initAdd(){ if(!STORES.length) STORES=await api("/stores"); if(!CATS.length) CATS=await api("/categories"); $("#category").innerHTML=`<option value="">—</option>`+CATS.map(c=>`<option>${c}</option>`).join(""); renderStores(); }
+function renderStores(){ $("#stores").innerHTML=""; STORES.forEach(s=>{ const l=document.createElement("label"); l.className="stchk on"; l.innerHTML=`<input type="checkbox" checked data-id="${s.id}"> ${s.name}`; l.querySelector("input").onchange=e=>l.classList.toggle("on",e.target.checked); $("#stores").appendChild(l); }); }
+$("#vegYes").onclick=()=>setVeg(true); $("#vegNo").onclick=()=>setVeg(false);
+function setVeg(v){ VEG=v; $("#vegYes").setAttribute("aria-pressed",v); $("#vegNo").setAttribute("aria-pressed",!v); }
+
+let nameT;
+$("#name").addEventListener("input",e=>{ clearTimeout(nameT); if(e.target.value.trim().length<3) return; nameT=setTimeout(()=>gen(false),500); });
+$("#quick").onclick=()=>gen(false); $("#genai").onclick=()=>gen(true);
+async function gen(useLLM){
+  const title=$("#name").value.trim(); if(title.length<2){ toast("Name daalo"); return; }
+  $("#tagMeta").textContent=useLLM?"generating with AI…":"generating…";
+  try{
+    const d=await api("/ai/tags/grouped",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({title,veg:VEG,useLLM})});
+    BYLANG=d.byLang;
+    if(!$("#brand").value) $("#brand").value=d.brand||"";
+    $("#brand").placeholder=d.brand?`${d.brand} (detected)`:"auto-detected";
+    if(d.category&&d.category!=="generic"){ if(!CATS.includes(d.category)){ CATS.push(d.category); $("#category").innerHTML=`<option value="">—</option>`+CATS.map(c=>`<option>${c}</option>`).join(""); } $("#category").value=d.category; }
+    if(!$("#size").value) $("#size").value=(title.match(/\d+\s?(kg|g|gm|ml|l|ltr|pcs?|pack)s?$/i)||[""])[0].trim();
+    $("#tagMeta").textContent=`${d.count} tags in ${d.ms} ms · ${d.source==="ai"?"AI + dictionary":"dictionary only"} · category: ${d.category}${d.llm_error?" · ⚠ LLM offline":""}`;
+    renderLangs();
+  }catch(e){ $("#tagMeta").textContent="error: "+e.message; }
+}
+function renderLangs(){
+  const w=$("#langRows"); w.innerHTML="";
+  Object.entries(BYLANG).forEach(([lang,arr])=>{
+    const row=document.createElement("div"); row.className="langrow";
+    const chips=document.createElement("div"); chips.className="chips";
+    arr.forEach((t,i)=>{ const c=document.createElement("span"); c.className="ch"+(lang==="English"||lang==="Hinglish"?"":" other"); c.innerHTML=`${t} <button>×</button>`; c.querySelector("button").onclick=()=>{ arr.splice(i,1); renderLangs(); }; chips.appendChild(c); });
+    const inp=document.createElement("input"); inp.className="chadd"; inp.placeholder="add + Enter";
+    inp.addEventListener("keydown",e=>{ if(e.key==="Enter"&&inp.value.trim()){ arr.push(inp.value.trim().toLowerCase()); inp.value=""; renderLangs(); } });
+    chips.appendChild(inp);
+    row.innerHTML=`<div class="lang">${lang}</div>`; row.appendChild(chips); w.appendChild(row);
+  });
+}
+$("#save").onclick=async()=>{
+  const title=$("#name").value.trim(); if(!title){ toast("Name daalo"); return; }
+  const mrp=Number($("#mrp").value||0); const stores=$$("#stores input:checked").map(i=>i.dataset.id);
+  if(!stores.length){ toast("Kam se kam ek store select karo"); return; }
+  if(!mrp){ toast("MRP daalo"); return; }
+  const flat=Object.values(BYLANG).flat();
+  const tags=[...new Set([...(BYLANG.English||[]),...(BYLANG.Hinglish||[])])];
+  const aliases=[...new Set(flat.filter(t=>!tags.includes(t)))];
+  const inventory=stores.map(id=>({storeId:id,stock:50,price:mrp}));
+  const body={title,category:$("#category").value||null,veg:VEG,unit:$("#size").value.trim()||null,tags,aliases,inventory};
+  try{ const r=await api("/products",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)}); toast(`Added ✓ ${r.productId} — indexing…`); $("#name").value=""; $("#brand").value=""; $("#mrp").value=""; BYLANG={}; renderLangs(); $("#tagMeta").textContent="Type a product name to generate tags."; }
+  catch(e){ toast("Error: "+e.message); }
+};
+
+// ---------- searches ----------
+$("#sStore").onchange=loadSearches;
+async function loadSearches(){
+  let d; try{ d=await api(`/admin/analytics${$("#sStore").value?`?store=${$("#sStore").value}`:""}`);}catch(e){ return; }
+  const tmax=Math.max(1,...d.top.map(t=>t.count));
+  $("#topList2").innerHTML=d.top.length?"":`<div class="muted">No searches yet.</div>`;
+  d.top.forEach(t=>{ const r=document.createElement("div"); r.className="barrow"; r.innerHTML=`<span class="nm">${t.query}</span><span class="bar"><i style="width:${Math.round(t.count/tmax*100)}%"></i></span><span class="c num">${t.count}</span>`; $("#topList2").appendChild(r); });
+  const ml=$("#missList"); ml.innerHTML=d.missed.length?"":`<div class="muted">No missed searches 🎉</div>`;
+  d.missed.forEach(m=>{ const r=document.createElement("div"); r.className="miss"; r.innerHTML=`<span class="q">${m.query}</span><span class="cnt">${m.count}× no match</span><button class="btn sec sm">Map to product</button><div class="mapbox"><input type="text" placeholder="search a product…"><div class="mapres"></div></div>`;
+    const box=r.querySelector(".mapbox"),inp=r.querySelector("input"),res=r.querySelector(".mapres");
+    r.querySelector("button").onclick=()=>box.classList.toggle("show");
+    let t; inp.oninput=()=>{ clearTimeout(t); t=setTimeout(async()=>{ const q=inp.value.trim(); if(q.length<2)return; const store=$("#sStore").value||STORES[0]?.id||"S1"; try{ const dd=await api(`/search?q=${encodeURIComponent(q)}&store=${store}`); res.innerHTML=""; dd.results.slice(0,6).forEach(p=>{ const b=document.createElement("button"); b.textContent=p.title; b.onclick=async()=>{ try{ await api("/admin/map-alias",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({query:m.query,productId:p.id})}); toast(`"${m.query}" → ${p.title} ✓`); box.classList.remove("show"); }catch(e){ toast("Error: "+e.message); } }; res.appendChild(b); }); }catch(e){} },350); };
+    ml.appendChild(r); });
+}
+
+// ---------- locations ----------
+async function loadLocations(){ if(!STORES.length) STORES=await api("/stores"); $("#locList").innerHTML=STORES.map(s=>`<div class="lrow"><span class="q">📍 ${s.name} <span class="muted">(${s.id})</span></span><span class="muted">${(s.pincodes||[]).join(", ")}</span></div>`).join(""); }
+
+$("#gateBtn").onclick=async()=>{ const k=$("#gateKey").value.trim(); if(!k){ $("#gateMsg").textContent="Enter a key"; $("#gateMsg").className="gatemsg err"; return; } $("#gateMsg").className="gatemsg"; $("#gateMsg").textContent="checking…"; if(await verifyKey(k)){ ADMIN_KEY=k; localStorage.setItem("zk_admin_key",k); hideGate(); updateKeyStatus(true); boot(); } else { $("#gateMsg").textContent="Invalid key — try again"; $("#gateMsg").className="gatemsg err"; } };
+$("#gateKey").addEventListener("keydown",e=>{ if(e.key==="Enter") $("#gateBtn").click(); });
+$("#signout").onclick=(e)=>{ e.preventDefault(); ADMIN_KEY=""; localStorage.removeItem("zk_admin_key"); updateKeyStatus(false); showGate(); };
+
+async function boot(){
+  try{ STORES=await api("/stores"); CATS=await api("/categories"); const sel=`<option value="">All stores</option>`+STORES.map(s=>`<option value="${s.id}">${s.name}</option>`).join(""); $("#aStore").innerHTML=sel; $("#sStore").innerHTML=sel; }catch{}
+  loadOverview();
+}
+(async()=>{
+  const saved=localStorage.getItem("zk_theme"); if(saved) document.documentElement.setAttribute("data-theme",saved);
+  if(ADMIN_KEY && await verifyKey(ADMIN_KEY)){ updateKeyStatus(true); hideGate(); boot(); }
+  else { ADMIN_KEY=""; updateKeyStatus(false); showGate(); }
+})();
+</script>
+</body>
+</html>

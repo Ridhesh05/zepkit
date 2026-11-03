@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ZepKit — groceries in 10 minutes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#f7f6ff; --surface:#ffffff; --surface-2:#f1edff; --surface-3:#e6defb;
+    --ink:#1a123a; --muted:#6b6392; --faint:#9890bf;
+    --border:#ebe6fb; --border-strong:#d9d0f6;
+    --primary:#6d28d9; --primary-ink:#5b21b6; --primary-soft:#ede9fe;
+    --veg:#15a34a; --off:#f43f5e; --oos:#aba3c9;
+    --shadow-sm:0 1px 2px rgba(80,40,160,.07),0 2px 12px rgba(100,50,200,.07);
+    --shadow-md:0 8px 22px rgba(100,50,200,.16),0 18px 48px rgba(100,50,200,.12);
+    --radius:16px;
+  }
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;
+    --bg:#130c29; --surface:#1c1443; --surface-2:#271c58; --surface-3:#32266e;
+    --ink:#efeaff; --muted:#b0a6da; --faint:#7d72ac; --border:#2e2360; --border-strong:#413487;
+    --primary:#a78bfa; --primary-ink:#ddd0ff; --primary-soft:#2b1f60; --veg:#45c46e; --off:#fb7185;
+    --shadow-sm:0 1px 2px rgba(0,0,0,.4); --shadow-md:0 10px 26px rgba(0,0,0,.5);}}
+  :root[data-theme="dark"]{color-scheme:dark;
+    --bg:#130c29; --surface:#1c1443; --surface-2:#271c58; --surface-3:#32266e;
+    --ink:#efeaff; --muted:#b0a6da; --faint:#7d72ac; --border:#2e2360; --border-strong:#413487;
+    --primary:#a78bfa; --primary-ink:#ddd0ff; --primary-soft:#2b1f60; --veg:#45c46e; --off:#fb7185;
+    --shadow-sm:0 1px 2px rgba(0,0,0,.4); --shadow-md:0 10px 26px rgba(0,0,0,.5);}
+
+  *{box-sizing:border-box} html{scroll-behavior:smooth} html,body{margin:0}
+  body{background:var(--bg); color:var(--ink); font-family:"Plus Jakarta Sans",system-ui,sans-serif; line-height:1.5; -webkit-font-smoothing:antialiased; padding-bottom:88px}
+  h1,h2,h3{font-family:"Outfit",sans-serif} button{font-family:inherit; cursor:pointer} .num{font-variant-numeric:tabular-nums}
+  ::selection{background:color-mix(in srgb,var(--primary) 24%,transparent)}
+
+  header{position:sticky; top:0; z-index:40; background:var(--surface); border-bottom:1px solid var(--border); box-shadow:var(--shadow-sm)}
+  .bar{max-width:1180px; margin:0 auto; padding:12px clamp(14px,3vw,28px); display:flex; align-items:center; gap:14px}
+  .brand{display:flex; align-items:center; gap:8px; font-family:"Outfit"; font-weight:800; font-size:22px; color:var(--primary); text-decoration:none}
+  .brand .dot{width:12px;height:12px;border-radius:50%;background:var(--primary);box-shadow:0 0 0 4px var(--primary-soft)} .brand b{color:var(--ink)}
+  .badge10{display:inline-flex; align-items:center; gap:4px; font-family:"Outfit"; font-weight:700; font-size:11px; color:var(--primary-ink); background:var(--primary-soft); padding:4px 9px; border-radius:999px; white-space:nowrap}
+  .loc{display:flex; flex-direction:column; align-items:flex-start; gap:1px; background:none; border:0; padding:4px 10px; border-radius:10px; color:var(--ink)} .loc:hover{background:var(--surface-2)}
+  .loc .k{font-size:11px; color:var(--muted)} .loc .v{font-family:"Outfit"; font-weight:700; font-size:13px}
+  .spacer{flex:1}
+  .icon-btn{display:grid; place-items:center; width:40px; height:40px; border-radius:12px; background:var(--surface-2); border:1px solid var(--border); color:var(--ink); font-size:17px}
+  .cart-btn{flex:none; align-self:center; position:relative; display:inline-flex; align-items:center; gap:7px; height:38px; padding:0 13px; border-radius:11px; background:var(--primary); color:#fff; border:0; font-family:"Outfit"; font-weight:700; font-size:13.5px; line-height:1; white-space:nowrap}
+  .cart-btn .cnt{background:#fff; color:var(--primary-ink); border-radius:999px; font-size:12px; padding:1px 7px; font-weight:800} .cart-btn.empty{background:var(--surface-2); color:var(--muted)}
+  @media(max-width:520px){.cart-btn .lbl{display:none}}
+  .ghost{height:40px;padding:0 13px;border-radius:12px;border:1px solid var(--border);background:var(--surface-2);color:var(--ink);font-weight:600;font-size:13px;text-decoration:none;display:inline-flex;align-items:center}
+
+  .searchwrap{position:sticky; top:65px; z-index:35; background:var(--bg); padding:12px clamp(14px,3vw,28px); border-bottom:1px solid var(--border)}
+  .searchwrap .inner{max-width:1180px; margin:0 auto; position:relative}
+  .search{width:100%; height:52px; border-radius:14px; border:1.5px solid var(--border-strong); background:var(--surface); padding:0 46px; font-size:15px; color:var(--ink); font-family:inherit; box-shadow:var(--shadow-sm)}
+  .search:focus{outline:none; border-color:var(--primary); box-shadow:0 0 0 4px var(--primary-soft)}
+  .search-ico{position:absolute; left:16px; top:26px; transform:translateY(-50%); color:var(--primary); font-size:18px}
+  .search-clear{position:absolute; right:12px; top:26px; transform:translateY(-50%); border:0; background:var(--surface-2); color:var(--muted); width:26px; height:26px; border-radius:50%; display:none; place-items:center}
+  .search-clear.show{display:grid}
+  .aclist{position:absolute; left:0; right:0; top:58px; background:var(--surface); border:1px solid var(--border); border-radius:14px; box-shadow:var(--shadow-md); overflow:hidden; display:none; z-index:50}
+  .aclist.show{display:block}
+  .acrow{display:flex; align-items:center; gap:12px; padding:10px 14px; cursor:pointer}
+  .acrow:hover{background:var(--surface-2)}
+  .acrow .ic{width:36px; height:36px; border-radius:9px; background:linear-gradient(140deg,var(--surface-2),var(--surface-3)); display:grid; place-items:center; font-size:20px; flex:none}
+  .acrow .nm{flex:1; font-size:14px; font-weight:600} .acrow .nm small{display:block; color:var(--muted); font-weight:500; font-size:12px}
+  .acrow .pr{font-family:"Outfit"; font-weight:800; font-size:14px}
+
+  .hero{max-width:1180px; margin:16px auto 0; padding:0 clamp(14px,3vw,28px)}
+  .herobox{background:linear-gradient(120deg,#7c3aed 0%,#c026d3 48%,#4f46e5 100%); color:#fff; border-radius:22px; padding:clamp(22px,4vw,40px); position:relative; overflow:hidden}
+  .herobox .pill10{display:inline-flex; align-items:center; gap:6px; background:rgba(255,255,255,.16); padding:5px 12px; border-radius:999px; font-size:12px; font-weight:700; font-family:"Outfit"}
+  .herobox h1{font-size:clamp(28px,5vw,46px); font-weight:800; letter-spacing:-.03em; line-height:1.05; margin:14px 0 8px}
+  .herobox p{margin:0 0 16px; opacity:.9; font-size:15px; max-width:52ch}
+  .exchips{display:flex; flex-wrap:wrap; gap:8px}
+  .ex{display:inline-flex; align-items:center; gap:6px; background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.18); color:#fff; padding:8px 13px; border-radius:999px; font-size:13px; font-weight:600}
+  .ex:hover{background:rgba(255,255,255,.26)}
+  .herobox .glow{position:absolute; right:-40px; top:-40px; width:260px; height:260px; background:radial-gradient(circle,rgba(255,255,255,.22),transparent 70%)}
+
+  .chips{max-width:1180px; margin:0 auto; padding:16px clamp(14px,3vw,28px) 2px; display:flex; gap:8px; overflow-x:auto; scrollbar-width:none} .chips::-webkit-scrollbar{display:none}
+  .chip{flex:none; display:inline-flex; align-items:center; gap:6px; padding:8px 14px; border-radius:999px; background:var(--surface); border:1px solid var(--border); color:var(--ink); font-size:13.5px; font-weight:600; white-space:nowrap; transition:all .14s}
+  .chip:hover{border-color:var(--primary); color:var(--primary)} .chip[aria-pressed="true"]{background:var(--primary); border-color:var(--primary); color:#fff}
+
+  main{max-width:1180px; margin:0 auto; padding:8px clamp(14px,3vw,28px) 40px}
+  .resultline{display:flex; align-items:baseline; gap:10px; margin:16px 2px 6px; flex-wrap:wrap}
+  .resultline h2{font-size:18px; font-weight:700; margin:0; letter-spacing:-.01em} .resultline .meta{font-size:13px; color:var(--muted)}
+  .note{font-size:13px; color:var(--primary-ink); background:var(--primary-soft); padding:3px 10px; border-radius:8px; font-weight:600}
+  .demo-tag{font-size:11px; color:var(--muted); border:1px dashed var(--border-strong); padding:2px 8px; border-radius:7px}
+
+  .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(155px,1fr)); gap:14px; margin-top:8px}
+  @keyframes rise{from{opacity:0; transform:translateY(12px)} to{opacity:1; transform:none}}
+  .card{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:10px; display:flex; flex-direction:column; gap:8px; box-shadow:var(--shadow-sm); transition:transform .14s, box-shadow .14s, border-color .14s; animation:rise .36s cubic-bezier(.2,.7,.3,1) both}
+  .card:hover{transform:translateY(-4px); box-shadow:var(--shadow-md); border-color:var(--border-strong)}
+  .tile{position:relative; aspect-ratio:1/1; border-radius:12px; display:grid; place-items:center; font-size:48px; background:linear-gradient(140deg,var(--surface-2),var(--surface-3)); overflow:hidden}
+  .tile .eta{position:absolute; left:6px; bottom:6px; font-size:10px; font-weight:700; color:var(--primary-ink); background:var(--surface); padding:2px 6px; border-radius:6px; font-family:"Outfit"; box-shadow:var(--shadow-sm)}
+  .tile .off{position:absolute; left:0; top:0; font-size:10px; font-weight:800; color:#fff; background:var(--off); padding:3px 7px; border-radius:12px 0 10px 0; font-family:"Outfit"}
+  .veg{width:15px; height:15px; border:1.5px solid var(--veg); border-radius:3px; display:grid; place-items:center} .veg::after{content:""; width:7px; height:7px; border-radius:50%; background:var(--veg)}
+  .card .name{font-size:13.5px; font-weight:600; line-height:1.3; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; min-height:2.6em}
+  .card .pack{font-size:12px; color:var(--muted)}
+  .foot{display:flex; align-items:center; justify-content:space-between; gap:6px; margin-top:auto}
+  .price{font-family:"Outfit"; font-weight:800; font-size:15px} .price .rupee{font-size:12px; font-weight:600; color:var(--muted)} .price .mrp{font-size:11px; color:var(--faint); text-decoration:line-through; font-weight:600; margin-left:3px}
+  .add{height:33px; min-width:64px; border-radius:10px; border:1.5px solid var(--primary); background:var(--primary-soft); color:var(--primary-ink); font-family:"Outfit"; font-weight:800; font-size:13px; letter-spacing:.03em; transition:all .14s}
+  .add:hover{background:var(--primary); color:#fff} .add:active{transform:scale(.95)}
+  .stepper{display:inline-flex; align-items:center; height:33px; border-radius:10px; background:var(--primary); color:#fff; font-family:"Outfit"; font-weight:800; overflow:hidden; box-shadow:var(--shadow-sm)}
+  .stepper button{width:30px; height:33px; background:none; border:0; color:#fff; font-size:17px} .stepper button:hover{background:rgba(255,255,255,.2)} .stepper .q{min-width:22px; text-align:center; font-size:14px}
+  .card.oos{opacity:.6} .card.oos .tile::before{content:"Out of stock"; position:absolute; inset:0; display:grid; place-items:center; background:color-mix(in srgb,var(--surface) 72%,transparent); color:var(--oos); font-family:"Outfit"; font-weight:700; font-size:13px}
+  .add[disabled]{border-color:var(--border-strong); background:var(--surface-2); color:var(--oos); cursor:not-allowed}
+
+  .empty{text-align:center; padding:60px 20px; color:var(--muted); animation:rise .4s ease both} .empty .big{font-size:44px; margin-bottom:8px} .empty h3{font-size:18px; color:var(--ink); margin:0 0 4px}
+  .skel{background:linear-gradient(90deg,var(--surface-2),var(--surface-3),var(--surface-2)); background-size:200% 100%; animation:sh 1.1s infinite; border-radius:var(--radius); height:234px}
+  @keyframes sh{to{background-position:-200% 0}}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important} .card{transition:none}}
+
+  .cartbar{position:fixed; left:0; right:0; bottom:0; z-index:45; background:var(--primary); color:#fff; transform:translateY(120%); transition:transform .2s cubic-bezier(.2,.8,.2,1)} .cartbar.show{transform:none}
+  .cartbar .inner{max-width:1180px; margin:0 auto; padding:14px clamp(14px,3vw,28px); display:flex; align-items:center; justify-content:space-between; gap:12px}
+  .cartbar .sum{font-family:"Outfit"; font-weight:700} .cartbar .sum small{display:block; font-weight:500; opacity:.88; font-size:12px}
+  .cartbar .go{background:#fff; color:var(--primary-ink); border:0; border-radius:11px; height:44px; padding:0 20px; font-family:"Outfit"; font-weight:800; font-size:15px}
+
+  .scrim{position:fixed; inset:0; background:rgba(10,20,45,.5); z-index:60; opacity:0; pointer-events:none; transition:opacity .2s} .scrim.show{opacity:1; pointer-events:auto}
+  .sheet{position:fixed; z-index:61; background:var(--surface); box-shadow:var(--shadow-md)}
+  .drawer{top:0; right:0; bottom:0; width:min(420px,92vw); transform:translateX(100%); transition:transform .24s cubic-bezier(.2,.8,.2,1); display:flex; flex-direction:column} .drawer.show{transform:none}
+  .modal{left:50%; top:50%; transform:translate(-50%,-44%); width:min(400px,92vw); border-radius:var(--radius); padding:22px; opacity:0; transition:opacity .2s, transform .2s} .modal.show{transform:translate(-50%,-50%); opacity:1}
+  .sheet h3{margin:0 0 4px; font-size:19px} .sheet .sub{color:var(--muted); font-size:13px; margin:0 0 16px}
+  .dhead{display:flex; align-items:center; justify-content:space-between; padding:18px 20px; border-bottom:1px solid var(--border)} .dhead h3{margin:0; font-size:18px}
+  .citems{flex:1; overflow-y:auto; padding:8px 20px} .crow{display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid var(--border)}
+  .crow .ci-tile{width:46px; height:46px; border-radius:10px; background:linear-gradient(140deg,var(--surface-2),var(--surface-3)); display:grid; place-items:center; font-size:24px; flex:none}
+  .crow .ci-name{flex:1; font-size:13.5px; font-weight:600} .crow .ci-name small{display:block; color:var(--muted); font-weight:500}
+  .dfoot{padding:16px 20px; border-top:1px solid var(--border)}
+  .pininput{display:flex; gap:8px; margin-bottom:10px} .pininput input{flex:1; height:46px; border-radius:11px; border:1.5px solid var(--border-strong); background:var(--bg); padding:0 14px; font-size:15px; color:var(--ink); font-family:inherit}
+  .pininput input:focus{outline:none; border-color:var(--primary)}
+  .btn-primary{height:46px; border-radius:11px; border:0; background:var(--primary); color:#fff; font-family:"Outfit"; font-weight:700; font-size:15px; padding:0 18px; width:100%} .btn-primary:hover{background:var(--primary-ink)}
+  .store-opt{display:flex; align-items:center; justify-content:space-between; padding:12px 14px; border:1px solid var(--border); border-radius:12px; margin-top:8px; cursor:pointer} .store-opt:hover{border-color:var(--primary); background:var(--primary-soft)}
+  .store-opt .nm{font-weight:700; font-family:"Outfit"; font-size:14px} .store-opt .pc{font-size:12px; color:var(--muted)}
+  .pinmsg{font-size:13px; margin:2px 0 8px; min-height:1.2em} .pinmsg.err{color:var(--off)} .pinmsg.ok{color:var(--veg)}
+  .toast{position:fixed; left:50%; bottom:104px; transform:translateX(-50%) translateY(20px); z-index:80; background:var(--ink); color:var(--bg); padding:12px 20px; border-radius:12px; font-weight:600; font-size:14px; opacity:0; pointer-events:none; transition:opacity .22s, transform .22s; box-shadow:var(--shadow-md)} .toast.show{opacity:1; transform:translateX(-50%)}
+</style>
+</head>
+<body>
+  <header>
+    <div class="bar">
+      <a class="brand" href="#"><span class="dot"></span><span>zep<b>kit</b></span></a>
+      <span class="badge10">⚡ 10 min</span>
+      <button class="loc" id="locBtn"><span class="k">Deliver to</span><span class="v" id="locLabel">Select location ▾</span></button>
+      <span class="spacer"></span>
+      <a class="ghost" href="/admin.html">Admin</a>
+      <button class="icon-btn" id="themeBtn" aria-label="Toggle theme">◐</button>
+      <button class="cart-btn empty" id="cartBtn"><span>🛒</span><span class="lbl">Cart</span><span class="cnt" id="cartCnt" hidden>0</span></button>
+    </div>
+  </header>
+
+  <div class="searchwrap">
+    <div class="inner">
+      <span class="search-ico">🔍</span>
+      <input class="search" id="search" autocomplete="off" aria-label="Search" placeholder="Search for products" />
+      <button class="search-clear" id="searchClear" aria-label="Clear">✕</button>
+      <div class="aclist" id="aclist"></div>
+    </div>
+  </div>
+
+  <div class="hero" id="hero">
+    <div class="herobox">
+      <div class="glow"></div>
+      <span class="pill10">⚡ Delivery in 10 minutes</span>
+      <h1>Search the way you speak.</h1>
+      <p>Hindi, Tamil, Hinglish or English. Type a product, or just say what you need.</p>
+      <div class="exchips" id="exchips"></div>
+    </div>
+  </div>
+
+  <div class="chips" id="chips"></div>
+
+  <main>
+    <div class="resultline">
+      <h2 id="resultTitle">Popular near you</h2>
+      <span class="meta" id="resultMeta"></span>
+      <span class="note" id="resultNote" hidden></span>
+      <span class="spacer"></span>
+      <span class="demo-tag" id="demoTag" hidden>demo data (API offline)</span>
+    </div>
+    <div class="grid" id="grid"></div>
+  </main>
+
+  <div class="cartbar" id="cartbar"><div class="inner"><div class="sum"><span id="cartbarTotal">₹0</span><small id="cartbarItems">0 items</small></div><button class="go" id="cartbarGo">View cart →</button></div></div>
+
+  <div class="scrim" id="scrim"></div>
+  <aside class="sheet drawer" id="cartDrawer" aria-hidden="true">
+    <div class="dhead"><h3>Your cart</h3><button class="icon-btn" id="cartClose">✕</button></div>
+    <div class="citems" id="cartItems"></div>
+    <div class="dfoot"><div style="display:flex;justify-content:space-between;margin-bottom:12px;font-family:'Outfit';font-weight:800"><span>Total</span><span id="cartTotal" class="num">₹0</span></div><button class="btn-primary" id="placeOrder">Place order</button></div>
+  </aside>
+
+  <div class="sheet modal" id="locModal" role="dialog" aria-modal="true" aria-hidden="true">
+    <h3>Choose your location</h3><p class="sub">Enter a pincode — we’ll show stock from your nearest dark store.</p>
+    <div class="pininput"><input id="pinInput" inputmode="numeric" maxlength="6" placeholder="e.g. 400053" /><button class="btn-primary" style="width:auto" id="pinCheck">Check</button></div>
+    <div class="pinmsg" id="pinMsg"></div><div id="storeList"></div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script>
+const $=(s)=>document.querySelector(s);
+const money=(n)=>`<span class="rupee">₹</span>${Math.round(n)}`;
+const CAT={salt:{e:"🧂",l:"Salt"},milk:{e:"🥛",l:"Dairy"},atta:{e:"🌾",l:"Atta"},rice:{e:"🍚",l:"Rice"},sugar:{e:"🍬",l:"Sugar"},tea:{e:"🍵",l:"Tea"},biscuit:{e:"🍪",l:"Biscuits"},soap:{e:"🧼",l:"Soap"},shampoo:{e:"🧴",l:"Care"},potato:{e:"🥔",l:"Veggies"},oil:{e:"🛢️",l:"Oil"},bread:{e:"🍞",l:"Bread"},paneer:{e:"🧀",l:"Paneer"},curd:{e:"🥣",l:"Curd"},noodles:{e:"🍜",l:"Noodles"},namkeen:{e:"🥨",l:"Namkeen"},chips:{e:"🍟",l:"Chips"},chocolate:{e:"🍫",l:"Chocolate"},softdrink:{e:"🥤",l:"Drinks"},water:{e:"💧",l:"Water"},detergent:{e:"🧺",l:"Detergent"},toothpaste:{e:"🪥",l:"Oral"},coffee:{e:"☕",l:"Coffee"},ghee:{e:"🫙",l:"Ghee"},honey:{e:"🍯",l:"Honey"},generic:{e:"🛒",l:"More"}};
+const emoji=(c)=>(CAT[c]?.e)||"🛒";
+const HUE={salt:220,milk:210,atta:38,rice:46,sugar:330,tea:150,biscuit:30,soap:188,shampoo:285,potato:40,oil:48,bread:28,paneer:50,curd:205,noodles:16,namkeen:14,chips:42,chocolate:22,softdrink:350,water:195,detergent:225,toothpaste:172,coffee:24,ghee:44,honey:40,generic:270};
+const catTint=(c)=>{const h=HUE[c]??270;return `linear-gradient(140deg, color-mix(in srgb, hsl(${h} 90% 58%) 15%, var(--surface)), color-mix(in srgb, hsl(${h} 90% 58%) 32%, var(--surface)))`;};
+const EXAMPLES=["doodh","பால்","mujhe chai peeni hai","amul doodh 60 se kam","pulav khana hai","சோப்பு"];
+const SAMPLE_STORES=[{id:"S1",name:"Andheri",pincodes:["400053"]}];
+const SAMPLE=[{id:"s1",title:"Tata Salt 1kg",category:"salt",veg:true,price:22,stock:40,inStock:true},{id:"s2",title:"Amul Milk 500ml",category:"milk",veg:true,price:29,stock:25,inStock:true},{id:"s3",title:"Maggi Noodles 70g",category:"noodles",veg:true,price:14,stock:90,inStock:true},{id:"s4",title:"Lays Chips 52g",category:"chips",veg:true,price:20,stock:70,inStock:true},{id:"s5",title:"Cadbury Chocolate 100g",category:"chocolate",veg:true,price:90,stock:40,inStock:true},{id:"s6",title:"Coca Cola Cold Drink 750ml",category:"softdrink",veg:true,price:40,stock:60,inStock:true},{id:"s7",title:"Dove Soap 100g",category:"soap",veg:true,price:45,stock:0,inStock:false},{id:"s8",title:"Fresh Aloo 1kg",category:"potato",veg:true,price:30,stock:60,inStock:true},{id:"s9",title:"Amul Paneer 200g",category:"paneer",veg:true,price:85,stock:18,inStock:true},{id:"s10",title:"Surf Excel Detergent 1kg",category:"detergent",veg:true,price:120,stock:33,inStock:true}];
+
+let STATE={store:null,storeName:"",category:null,query:"",demo:false,cart:loadCart()};
+function loadCart(){try{return JSON.parse(localStorage.getItem("zk_cart")||"{}")}catch{return{}}}
+function saveCart(){try{localStorage.setItem("zk_cart",JSON.stringify(STATE.cart))}catch{}}
+async function api(p,o){const r=await fetch(p,o);if(!r.ok)throw new Error(r.status);return r.json();}
+function track(type,extra){ fetch("/events",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({type,store:STATE.store,query:STATE.query,...extra})}).catch(()=>{}); }
+function disc(id){let h=0;for(const c of String(id))h=(h*31+c.charCodeAt(0))>>>0;return 8+(h%12);}
+
+async function init(){
+  const saved=localStorage.getItem("zk_theme"); if(saved) document.documentElement.setAttribute("data-theme",saved);
+  $("#exchips").innerHTML=EXAMPLES.map(q=>`<button class="ex">🔍 ${q}</button>`).join("");
+  $("#exchips").querySelectorAll(".ex").forEach((b,i)=>b.onclick=()=>{ $("#search").value=EXAMPLES[i]; STATE.query=EXAMPLES[i]; $("#searchClear").classList.add("show"); doSearch(); });
+  try{ const stores=await api("/stores"); if(!stores.length)throw 0; window.__stores=stores; setStore(stores[0].id,stores[0].name); buildChips(await api("/categories")); }
+  catch(e){ STATE.demo=true; $("#demoTag").hidden=false; window.__stores=SAMPLE_STORES; setStore("S1","Andheri"); buildChips([...new Set(SAMPLE.map(p=>p.category))]); }
+  renderCart(); doSearch();
+}
+function buildChips(cats){ const chips=$("#chips"); const mk=(key,label,all)=>{ const b=document.createElement("button"); b.className="chip"; b.setAttribute("aria-pressed","false"); b.innerHTML=all?`🛍️ ${label}`:`${emoji(key)} ${label}`; b.onclick=()=>{ STATE.category=all?null:key; [...chips.children].forEach(c=>c.setAttribute("aria-pressed","false")); b.setAttribute("aria-pressed","true"); doSearch(); }; return b; }; chips.innerHTML=""; const all=mk(null,"All",true); chips.appendChild(all); cats.forEach(c=>chips.appendChild(mk(c,CAT[c]?.l||c))); all.setAttribute("aria-pressed",String(!STATE.category)); }
+
+async function doSearch(){
+  $("#hero").style.display=(STATE.query||STATE.category)?"none":"block";
+  const grid=$("#grid"); grid.innerHTML=Array.from({length:12}).map(()=>`<div class="skel"></div>`).join("");
+  let data;
+  try{
+    if(STATE.demo) throw 0;
+    const qs=new URLSearchParams({store:STATE.store}); if(STATE.query)qs.set("q",STATE.query); if(STATE.category)qs.set("category",STATE.category);
+    data=await api(`/search?${qs}`);
+  }catch(e){ let items=SAMPLE.filter(p=>!STATE.category||p.category===STATE.category); if(STATE.query){const q=STATE.query.toLowerCase();items=items.filter(p=>p.title.toLowerCase().includes(q)||p.category.includes(q));} data={mode:STATE.query?"hybrid":"browse",count:items.length,results:items,ms:1}; }
+  render(data);
+}
+function splitTitle(t){const m=t.match(/^(.*?)(\s+\d+(?:\.\d+)?\s?(?:kg|g|gm|ml|l|ltr|pcs?|pack)s?)$/i);return m?{name:m[1],pack:m[2].trim()}:{name:t,pack:""};}
+
+function render(data){
+  const {results=[],mode,count,ms}=data;
+  $("#resultTitle").textContent=STATE.query?`Results for “${STATE.query}”`:(STATE.category?CAT[STATE.category]?.l||STATE.category:"Popular near you");
+  $("#resultMeta").textContent=`${count} result${count===1?"":"s"}${ms!=null?` · ${ms} ms`:""}${STATE.storeName?` · ${STATE.storeName}`:""}`;
+  const note=$("#resultNote"); if(mode==="closest"){note.hidden=false;note.textContent="No exact match — closest items";}else note.hidden=true;
+  const grid=$("#grid");
+  if(results.length===0){ grid.innerHTML=`<div class="empty" style="grid-column:1/-1"><div class="big">🔍</div><h3>Kuch nahi mila</h3><p>Try another spelling or term — hum Hindi, Tamil, Bangla sab samajhte hain.</p></div>`; return; }
+  grid.innerHTML=""; results.forEach((p,i)=>{const c=card(p);c.style.animationDelay=Math.min(i*0.022,0.5)+"s";grid.appendChild(c);});
+}
+function card(p){
+  const {name,pack}=splitTitle(p.title); const d=disc(p.id); const mrp=Math.round(p.price/(1-d/100));
+  const el=document.createElement("div"); el.className="card"+(p.inStock?"":" oos");
+  const qty=STATE.cart[p.id]?.qty||0;
+  el.innerHTML=`<div class="tile">${p.inStock?`<span class="off">${d}% off</span>`:""}${emoji(p.category)}<span class="eta">⚡ ${6+Math.floor(Math.random()*6)} min</span></div>
+    <div style="display:flex;align-items:center;gap:6px">${p.veg?'<span class="veg" title="Veg"></span>':""}<span class="pack">${pack||" "}</span></div>
+    <div class="name">${name}</div>
+    <div class="foot"><div class="price num">${money(p.price)}<span class="mrp">₹${mrp}</span></div><div class="act"></div></div>`;
+  el.querySelector(".tile").style.background=catTint(p.category);
+  const act=el.querySelector(".act");
+  if(!p.inStock){act.innerHTML=`<button class="add" disabled>—</button>`;return el;}
+  renderAct(act,p,qty); return el;
+}
+function renderAct(act,p,qty){
+  if(qty<=0){const b=document.createElement("button");b.className="add";b.textContent="ADD";b.onclick=()=>{changeQty(p,1,act);track("click",{productId:p.id});};act.innerHTML="";act.appendChild(b);}
+  else{act.innerHTML=`<span class="stepper"><button>−</button><span class="q num">${qty}</span><button>+</button></span>`;act.querySelector(".stepper button:first-child").onclick=()=>changeQty(p,-1,act);act.querySelector(".stepper button:last-child").onclick=()=>changeQty(p,1,act);}
+}
+function changeQty(p,delta,act){const cur=STATE.cart[p.id]?.qty||0;const next=Math.max(0,cur+delta);if(next===0)delete STATE.cart[p.id];else STATE.cart[p.id]={id:p.id,title:p.title,category:p.category,price:p.price,qty:next};if(delta>0)track("add",{productId:p.id});saveCart();renderAct(act,p,next);renderCart();}
+
+// autocomplete
+let acT;
+async function autocomplete(q){
+  const box=$("#aclist");
+  if(!q||STATE.demo){box.classList.remove("show");return;}
+  try{ const d=await api(`/search?q=${encodeURIComponent(q)}&store=${STATE.store}`); const items=d.results.slice(0,5);
+    if(!items.length){box.classList.remove("show");return;}
+    box.innerHTML=items.map(p=>{const {name,pack}=splitTitle(p.title);return `<div class="acrow" data-id="${p.id}"><div class="ic">${emoji(p.category)}</div><div class="nm">${name}<small>${pack}</small></div><div class="pr num">₹${Math.round(p.price)}</div></div>`;}).join("");
+    box.querySelectorAll(".acrow").forEach((r,i)=>{ r.querySelector(".ic").style.background=catTint(items[i].category); r.onclick=()=>{ const p=items[i]; STATE.cart[p.id]={id:p.id,title:p.title,category:p.category,price:p.price,qty:(STATE.cart[p.id]?.qty||0)+1}; track("add",{productId:p.id}); saveCart(); renderCart(); doSearch(); box.classList.remove("show"); toast(`${splitTitle(p.title).name} added`); }; });
+    box.classList.add("show");
+  }catch(e){ box.classList.remove("show"); }
+}
+
+function cartArr(){return Object.values(STATE.cart);} function cartTotals(){const items=cartArr().reduce((s,i)=>s+i.qty,0);const total=cartArr().reduce((s,i)=>s+i.qty*i.price,0);return{items,total};}
+function renderCart(){const {items,total}=cartTotals();const btn=$("#cartBtn"),cnt=$("#cartCnt");if(items>0){btn.classList.remove("empty");cnt.hidden=false;cnt.textContent=items;}else{btn.classList.add("empty");cnt.hidden=true;}$("#cartbar").classList.toggle("show",items>0);$("#cartbarTotal").innerHTML=money(total);$("#cartbarItems").textContent=`${items} item${items===1?"":"s"}`;const wrap=$("#cartItems");if(items===0){wrap.innerHTML=`<div class="empty"><div class="big">🛒</div><h3>Cart khaali hai</h3><p>Add some products to get started.</p></div>`;}else{wrap.innerHTML="";cartArr().forEach(i=>{const {name,pack}=splitTitle(i.title);const row=document.createElement("div");row.className="crow";row.innerHTML=`<div class="ci-tile">${emoji(i.category)}</div><div class="ci-name">${name}<small>${pack}</small></div><span class="stepper"><button>−</button><span class="q num">${i.qty}</span><button>+</button></span><div class="price num" style="min-width:52px;text-align:right">${money(i.qty*i.price)}</div>`;const btns=row.querySelectorAll(".stepper button");btns[0].onclick=()=>{i.qty--;if(i.qty<=0)delete STATE.cart[i.id];else STATE.cart[i.id]=i;saveCart();renderCart();doSearch();};btns[1].onclick=()=>{i.qty++;STATE.cart[i.id]=i;saveCart();renderCart();doSearch();};wrap.appendChild(row);});}$("#cartTotal").innerHTML=money(total);}
+
+function setStore(id,name){STATE.store=id;STATE.storeName=name;$("#locLabel").innerHTML=`${name} ▾`;}
+async function checkPin(){const pin=$("#pinInput").value.trim();const msg=$("#pinMsg");if(!/^\d{6}$/.test(pin)){msg.className="pinmsg err";msg.textContent="Enter a valid 6-digit pincode";return;}if(STATE.demo){msg.className="pinmsg ok";msg.textContent="Serviceable · Andheri";setStore("S1","Andheri");doSearch();setTimeout(closeModal,700);return;}msg.className="pinmsg";msg.textContent="Checking…";try{const r=await api(`/locations/resolve?pincode=${pin}`);if(r.serviceable){msg.className="pinmsg ok";msg.textContent=`Serviceable · ${r.store.name}`;setStore(r.store.id,r.store.name);doSearch();setTimeout(closeModal,700);}else{msg.className="pinmsg err";msg.textContent="Sorry, we don’t deliver here yet — coming soon!";}}catch(e){msg.className="pinmsg err";msg.textContent="Could not check right now.";}}
+function renderStoreList(){const wrap=$("#storeList");const stores=window.__stores||[];wrap.innerHTML=`<div class="sub" style="margin:14px 0 2px">Or pick a store directly</div>`+stores.map(s=>`<div class="store-opt" data-id="${s.id}" data-name="${s.name}"><div><div class="nm">${s.name}</div><div class="pc">Pincodes: ${(s.pincodes||[]).join(", ")}</div></div><span>→</span></div>`).join("");wrap.querySelectorAll(".store-opt").forEach(o=>o.onclick=()=>{setStore(o.dataset.id,o.dataset.name);doSearch();closeModal();});}
+function openModal(){renderStoreList();$("#scrim").classList.add("show");$("#locModal").classList.add("show");$("#locModal").setAttribute("aria-hidden","false");setTimeout(()=>$("#pinInput").focus(),50);}
+function openDrawer(){$("#scrim").classList.add("show");$("#cartDrawer").classList.add("show");}
+function closeModal(){$("#scrim").classList.remove("show");$("#locModal").classList.remove("show");$("#cartDrawer").classList.remove("show");}
+let toastT;function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove("show"),2200);}
+
+let searchT;
+$("#search").addEventListener("input",(e)=>{STATE.query=e.target.value.trim();$("#searchClear").classList.toggle("show",!!STATE.query);clearTimeout(searchT);searchT=setTimeout(()=>{doSearch();autocomplete(STATE.query);},260);});
+$("#search").addEventListener("blur",()=>setTimeout(()=>$("#aclist").classList.remove("show"),200));
+$("#searchClear").onclick=()=>{$("#search").value="";STATE.query="";$("#searchClear").classList.remove("show");$("#aclist").classList.remove("show");doSearch();$("#search").focus();};
+$("#locBtn").onclick=openModal;$("#cartBtn").onclick=openDrawer;$("#cartbarGo").onclick=openDrawer;$("#cartClose").onclick=closeModal;$("#scrim").onclick=closeModal;$("#pinCheck").onclick=checkPin;$("#pinInput").addEventListener("keydown",(e)=>{if(e.key==="Enter")checkPin();});
+$("#placeOrder").onclick=()=>{if(cartArr().length===0){toast("Cart khaali hai");return;}STATE.cart={};saveCart();renderCart();closeModal();toast("Order placed — arriving in 10 min! 🎉");doSearch();};
+$("#themeBtn").onclick=()=>{const cur=document.documentElement.getAttribute("data-theme");const dark=cur==="dark"||(!cur&&matchMedia("(prefers-color-scheme:dark)").matches);const next=dark?"light":"dark";document.documentElement.setAttribute("data-theme",next);localStorage.setItem("zk_theme",next);};
+const PH=["aloo","आलू","potato","doodh","maggi","chai","chocolate","sabun"];let pi=0;setInterval(()=>{if(document.activeElement===$("#search")||STATE.query)return;pi=(pi+1)%PH.length;$("#search").setAttribute("placeholder",`Search “${PH[pi]}” …`);},1800);
+init();
+</script>
+</body>
+</html>

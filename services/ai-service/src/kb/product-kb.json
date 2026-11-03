@@ -1,0 +1,30 @@
+{
+  "umbrella_brands": ["tata", "amul", "fortune", "aashirvaad", "dove", "annapurna", "nestle", "patanjali", "dabur", "mother dairy", "britannia", "haldiram"],
+  "categories": {
+    "salt": { "hindi": ["namak"], "english": ["salt", "table salt"], "typos": ["namk", "salr", "slat"], "brands": ["tata", "annapurna", "catch", "nirma", "aashirvaad"], "all_langs": { "Hindi": ["नमक"] } },
+    "milk": { "hindi": ["dudh", "doodh"], "english": ["milk"], "typos": ["mlik", "dudhh", "milkk"], "brands": ["amul", "mother dairy", "nandini", "gokul", "nestle"], "all_langs": { "Hindi": ["दूध"] } },
+    "atta": { "hindi": ["atta", "gehu atta"], "english": ["wheat flour", "flour", "atta"], "typos": ["ata", "attaa", "aata"], "brands": ["aashirvaad", "pillsbury", "fortune", "annapurna"], "all_langs": { "Hindi": ["आटा"] } },
+    "rice": { "hindi": ["chawal", "chaval"], "english": ["rice", "basmati rice"], "typos": ["chaawal", "rics", "ricee"], "brands": ["india gate", "daawat", "fortune", "kohinoor"], "all_langs": { "Hindi": ["चावल"] } },
+    "sugar": { "hindi": ["cheeni", "chini", "shakkar"], "english": ["sugar"], "typos": ["suger", "sugr", "chinii"], "brands": ["madhur", "dhampure", "trust"], "all_langs": { "Hindi": ["चीनी"] } },
+    "tea": { "hindi": ["chai", "chay"], "english": ["tea", "tea leaves"], "typos": ["chae", "tae", "chaii"], "brands": ["tata", "red label", "taj mahal", "wagh bakri", "society"], "all_langs": { "Hindi": ["चाय"] } },
+    "biscuit": { "hindi": ["biscuit"], "english": ["biscuit", "cookies", "biscuits"], "typos": ["biskut", "biscut", "biscit"], "brands": ["parle", "britannia", "sunfeast", "oreo"], "all_langs": { "Hindi": ["बिस्कुट"] } },
+    "soap": { "hindi": ["sabun"], "english": ["soap", "bathing soap"], "typos": ["sabn", "soep"], "brands": ["lux", "lifebuoy", "dove", "santoor", "medimix", "dettol"], "all_langs": { "Hindi": ["साबुन"] } },
+    "shampoo": { "hindi": ["shampoo"], "english": ["shampoo"], "typos": ["shampo", "shempoo", "shampu"], "brands": ["dove", "head and shoulders", "clinic plus", "sunsilk", "pantene"], "all_langs": { "Hindi": ["शैम्पू"] } },
+    "potato": { "hindi": ["aloo", "alu"], "english": ["potato", "potatoes"], "typos": ["aalu", "potatoe"], "brands": [], "all_langs": { "Hindi": ["आलू"] } },
+    "oil": { "hindi": ["tel", "khana tel"], "english": ["cooking oil", "edible oil", "oil"], "typos": ["oill", "tael"], "brands": ["fortune", "saffola", "dhara", "sundrop", "gemini"], "all_langs": { "Hindi": ["तेल"] } },
+    "bread": { "hindi": ["bread", "double roti"], "english": ["bread", "sandwich bread"], "typos": ["bred", "braed"], "brands": ["britannia", "harvest", "modern", "english oven"], "all_langs": { "Hindi": ["ब्रेड"] } },
+    "paneer": { "hindi": ["paneer"], "english": ["paneer", "cottage cheese"], "typos": ["panir", "panner"], "brands": ["amul", "mother dairy", "gowardhan", "id"], "all_langs": { "Hindi": ["पनीर"] } },
+    "curd": { "hindi": ["dahi"], "english": ["curd", "yogurt"], "typos": ["dhai", "curdd"], "brands": ["amul", "mother dairy", "nestle", "gowardhan"], "all_langs": { "Hindi": ["दही"] } },
+    "noodles": { "hindi": ["noodles", "maggi"], "english": ["noodles", "instant noodles"], "typos": ["nudles", "noodels", "magi"], "brands": ["maggi", "yippee", "top ramen", "knorr"], "all_langs": { "Hindi": ["नूडल्स"] } },
+    "namkeen": { "hindi": ["namkeen", "bhujia", "mixture"], "english": ["namkeen", "snacks"], "typos": ["namkin", "bhujiya"], "brands": ["haldiram", "bikaji", "bikano", "lehar"], "all_langs": { "Hindi": ["नमकीन"] } },
+    "chips": { "hindi": ["chips", "wafers"], "english": ["chips", "potato chips"], "typos": ["chps", "chipss"], "brands": ["lays", "bingo", "kurkure", "uncle chipps"], "all_langs": { "Hindi": ["चिप्स"] } },
+    "chocolate": { "hindi": ["chocolate"], "english": ["chocolate", "choco"], "typos": ["choclate", "chocolet"], "brands": ["cadbury", "nestle", "amul", "kitkat"], "all_langs": { "Hindi": ["चॉकलेट"] } },
+    "softdrink": { "hindi": ["cold drink", "thanda"], "english": ["cold drink", "soft drink", "soda"], "typos": ["cola", "softdrink"], "brands": ["coca cola", "pepsi", "sprite", "thums up", "fanta"], "all_langs": { "Hindi": ["कोल्ड ड्रिंक"] } },
+    "water": { "hindi": ["pani", "paani"], "english": ["water", "mineral water", "drinking water"], "typos": ["watr", "paani"], "brands": ["bisleri", "kinley", "aquafina", "bailley"], "all_langs": { "Hindi": ["पानी"] } },
+    "detergent": { "hindi": ["detergent", "surf", "kapde dhone ka"], "english": ["detergent", "washing powder"], "typos": ["detergnt", "dtergent"], "brands": ["surf excel", "ariel", "tide", "rin", "ghadi"], "all_langs": { "Hindi": ["डिटर्जेंट"] } },
+    "toothpaste": { "hindi": ["toothpaste", "manjan", "colgate"], "english": ["toothpaste", "tooth paste"], "typos": ["toothpest", "tuthpaste"], "brands": ["colgate", "closeup", "pepsodent", "dabur", "sensodyne"], "all_langs": { "Hindi": ["टूथपेस्ट"] } },
+    "coffee": { "hindi": ["coffee", "kofi"], "english": ["coffee", "instant coffee"], "typos": ["cofee", "coffe"], "brands": ["nescafe", "bru", "sunrise"], "all_langs": { "Hindi": ["कॉफ़ी"] } },
+    "ghee": { "hindi": ["ghee", "ghi"], "english": ["ghee", "clarified butter"], "typos": ["ghii", "gheee"], "brands": ["amul", "patanjali", "gowardhan", "mother dairy"], "all_langs": { "Hindi": ["घी"] } },
+    "honey": { "hindi": ["shahad", "shehad"], "english": ["honey"], "typos": ["honi", "hony"], "brands": ["dabur", "patanjali", "apis", "zandu"], "all_langs": { "Hindi": ["शहद"] } }
+  }
+}
