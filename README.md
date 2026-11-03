@@ -1,10 +1,10 @@
 # ZepKit — Multilingual Semantic Search for Quick-Commerce
 
-> A Blinkit/Zepto-style grocery search that lets shoppers **search the way they speak** — in Hindi, Tamil, Bengali, Hinglish, English, with typos, slang, and natural language — and finds the right product, scoped to their nearest dark store.
+> A Blinkit/Zepto-style grocery app that lets shoppers **search the way they speak** — in Hindi, Tamil, Bengali, Hinglish, English, with typos, slang, and natural language — and finds the right product, scoped to their nearest dark store. Say "paneer butter masala banana hai" and get the ingredient list, ready to add to cart.
 
-Search `potato`, `आलू`, `aloo`, `আলু`, `உருளைக்கிழங்கு`, or even `amul doodh 60 se kam` — all work.
+Search `potato`, `आलू`, `aloo`, `আলু`, `உருளைக்கிழங்கு`, or even `amul doodh 60 se kam` — all work. Tap the mic and speak in Hindi — voice-to-ingredients, just like Blinkit.
 
-This project focuses **entirely on search** (not payments/personalization): multilingual semantic retrieval, a 14-language tag pipeline, store-scoped hybrid ranking, and a search-analytics loop.
+**35 product categories** (salt, milk, atta, rice, dal, cheese, pasta, paneer, nachos, soya sauce, and more) across 8 dark stores. Multilingual semantic retrieval, a 14-language tag pipeline, store-scoped hybrid ranking, recipe/intent detection, voice search, and a search-analytics loop.
 
 ---
 
@@ -24,6 +24,8 @@ Plain keyword search breaks the moment the shopper and the catalog disagree on w
 - **Multilingual** — one query in 14 languages finds the product (`bge-m3` embeddings + per-language tags/aliases).
 - **Hybrid search** — TypeSense BM25 (keyword + typo tolerance) fused with vector k-NN.
 - **Natural language** — `mujhe chai peeni hai` → tea; `amul doodh 60 se kam` → milk **under ₹60** (price parsed out of the query).
+- **Voice search (Hindi/Hinglish)** — Blinkit-style full-screen mic overlay. Speak in Hindi, see live transcript, get instant results. Uses Browser Speech API (`hi-IN`, continuous mode, interim results) — zero backend, zero latency.
+- **Recipe/intent detection** — say "paneer butter masala banana hai" and get a recipe card with 4 ingredients mapped to real products at your store, with "Add all to cart." Two-tier: instant KB dictionary (5 dishes) → Gemma 3 LLM fallback for novel dishes. Veg-only, fail-closed.
 - **Hyperlocal** — catalog is global, stock/price is **per dark store**; search is scoped by pincode → store.
 - **14-language tag generation** — rule-first dictionary (instant) + Gemma 3 LLM, moderated, grouped by language, editable.
 - **Content safety** — `guardTags()` gate: fail-closed, veg/non-veg correctness, no slurs, clean repo.
@@ -36,10 +38,10 @@ Plain keyword search breaks the moment the shopper and the catalog disagree on w
 ## Architecture
 
 ```
-   ADMIN (add product)                 USER (search)
+   ADMIN (add product)                 USER (search / voice 🎤)
        │                          pincode → /locations/resolve
        │ POST /ai/tags/grouped             │ GET /search?q=aloo&store=S1
-       │ POST /products                    │
+       │ POST /products                    │ (recipe detection: KB → LLM fallback)
        ▼                                   ▼
   ┌──────────────── API GATEWAY (Express) ─────────────────┐
   │  validate · produce          resolve · redis · embed · hybrid │
@@ -75,7 +77,9 @@ Plain keyword search breaks the moment the shopper and the catalog disagree on w
 
 **Write path.** `POST /products` assigns an `_id`, publishes `product.created` to Kafka, returns `202`. The worker enriches (tags + `bge-m3` vector + moderation), then **upserts** into Mongo, TypeSense (with `store_ids`), and Redis. The offset is committed only after all three succeed; 3 failures → DLQ. Idempotent upserts make retries safe.
 
-**Read path.** `GET /search?q=&store=` checks Redis → embeds the query (cached) → runs a TypeSense **hybrid** search (`query_by=title,tags,aliases` + `vector_query`) filtered by `store_ids`. If no keyword matched **and** the nearest vector is far, it's flagged `missed` (a demand signal); otherwise close semantic matches are shown as "closest".
+**Read path.** `GET /search?q=&store=` checks Redis → **recipe detection** (KB dictionary for known dishes, Gemma 3 LLM fallback for novel dishes with Hinglish trigger phrases like "banana hai") → embeds the query (cached) → runs a TypeSense **hybrid** search (`query_by=title,tags,aliases` + `vector_query`) filtered by `store_ids`. If a recipe is detected, the response includes a `recipe` object with the dish name and ingredients resolved to real products. If no keyword matched **and** the nearest vector is far, it's flagged `missed` (a demand signal); otherwise close semantic matches are shown as "closest".
+
+**Voice path.** The frontend uses the Browser Speech API (`hi-IN`, continuous mode) with a Blinkit-style full-screen overlay — speak naturally in Hindi/Hinglish, see a live transcript, and results appear when you stop. No backend needed — speech recognition runs entirely in the browser.
 
 ---
 
@@ -101,7 +105,7 @@ npm run dev:ai            # AI service   :4001
 npm run dev:api           # API gateway  :4000  (also serves the UI)
 npm run dev:worker        # Kafka worker
 
-# 5. seed 8 city stores + ~213 products
+# 5. seed 8 city stores + ~300 products (35 categories)
 node scripts/seed.js
 ```
 
@@ -109,6 +113,10 @@ node scripts/seed.js
 - **Admin** → http://localhost:4000/admin.html  (key: `zepkit-admin-2024`, change via `ADMIN_KEY`)
 
 Try: `aloo`, `आलू`, `doodh`, `maggi`, `thanda`, `mujhe chai peeni hai`, `amul doodh 60 se kam`.
+
+**Voice:** Tap 🎤 → speak "paneer butter masala banana hai" → see ingredients card → "Add all to cart."
+
+**Recipe:** Type `pav bhaji banana hai` or `dal tadka bana hai` → instant ingredient breakdown.
 
 ---
 
@@ -146,15 +154,15 @@ zepkit/
 ├── docker-compose.yml          # Kafka · TypeSense · Redis · MongoDB
 ├── packages/common/            # shared config, event contracts, store clients
 ├── services/
-│   ├── ai-service/             # Ollama wrapper: tags (14 langs) + embeddings + guardTags
+│   ├── ai-service/             # Ollama wrapper: tags (14 langs) + embeddings + guardTags + recipe detection
 │   ├── api-gateway/            # products · search · locations · analytics · RBAC · serves UI
 │   └── worker/                 # Kafka consumer → Mongo / TypeSense / Redis + DLQ
 ├── infra/                      # TypeSense schema · Kafka topics
 ├── scripts/                    # bootstrap · seed · embedding checks
-├── web/                        # shop (index.html) + admin (admin.html)
+├── web/                        # shop (index.html + voice overlay) + admin (admin.html)
 └── docs/                       # rules · content-safety · scoped · screenshots
 ```
 
 ---
 
-Built as a focused demonstration of search engineering: multilingual retrieval, hybrid ranking, event-driven indexing, and a measurable search-quality feedback loop.
+Built as a focused demonstration of search engineering: multilingual retrieval, hybrid ranking, event-driven indexing, voice-to-ingredients, recipe intent detection, and a measurable search-quality feedback loop.

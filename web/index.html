@@ -59,6 +59,18 @@
   .mic-btn:hover{color:var(--primary); background:var(--primary-soft)}
   .mic-btn.listening{color:#fff; background:var(--crit); animation:pulse 1s ease-in-out infinite}
   @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(244,63,94,.4)} 50%{box-shadow:0 0 0 8px rgba(244,63,94,0)}}
+
+  .voice-overlay{position:fixed; inset:0; z-index:70; background:color-mix(in srgb,var(--bg) 92%,transparent); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:18px; opacity:0; pointer-events:none; transition:opacity .22s}
+  .voice-overlay.show{opacity:1; pointer-events:auto}
+  .voice-mic-ring{width:110px; height:110px; border-radius:50%; background:var(--primary); display:grid; place-items:center; font-size:48px; box-shadow:0 0 0 0 color-mix(in srgb,var(--primary) 30%,transparent); cursor:pointer; transition:transform .15s}
+  .voice-mic-ring:hover{transform:scale(1.06)}
+  .voice-overlay.listening .voice-mic-ring{animation:vpulse 1.6s ease-in-out infinite}
+  @keyframes vpulse{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--primary) 30%,transparent); transform:scale(1)} 50%{box-shadow:0 0 0 22px color-mix(in srgb,var(--primary) 0%,transparent); transform:scale(1.06)}}
+  .voice-overlay.processing .voice-mic-ring{animation:none; opacity:.7}
+  .voice-status{font-family:"Outfit"; font-weight:600; font-size:15px; color:var(--muted); text-align:center; min-height:1.4em}
+  .voice-transcript{font-family:"Outfit"; font-weight:700; font-size:clamp(20px,4vw,28px); color:var(--ink); text-align:center; min-height:1.6em; max-width:80vw; word-break:break-word}
+  .voice-cancel{border:0; background:var(--surface-2); color:var(--muted); font-family:"Outfit"; font-weight:700; font-size:14px; padding:10px 28px; border-radius:999px; margin-top:10px; transition:background .15s,color .15s}
+  .voice-cancel:hover{background:var(--border-strong); color:var(--ink)}
   .aclist{position:absolute; left:0; right:0; top:58px; background:var(--surface); border:1px solid var(--border); border-radius:14px; box-shadow:var(--shadow-md); overflow:hidden; display:none; z-index:50}
   .aclist.show{display:block}
   .acrow{display:flex; align-items:center; gap:12px; padding:10px 14px; cursor:pointer}
@@ -208,6 +220,13 @@
     <div class="pinmsg" id="pinMsg"></div><div id="storeList"></div>
   </div>
 
+  <div class="voice-overlay" id="voiceOverlay">
+    <div class="voice-mic-ring" id="voiceMicRing">🎤</div>
+    <div class="voice-status" id="voiceStatus">Bolo kya banana hai...</div>
+    <div class="voice-transcript" id="voiceTranscript"></div>
+    <button class="voice-cancel" id="voiceCancel">Cancel</button>
+  </div>
+
   <div class="toast" id="toast"></div>
 
 <script>
@@ -332,31 +351,50 @@ $("#search").addEventListener("input",(e)=>{STATE.query=e.target.value.trim();$(
 $("#search").addEventListener("keydown",(e)=>{if(e.key==="Enter"){e.preventDefault();clearTimeout(searchT);$("#aclist").classList.remove("show");doSearch();}});
 $("#search").addEventListener("blur",()=>setTimeout(()=>$("#aclist").classList.remove("show"),200));
 
-// voice search
+// voice search — Blinkit-style overlay
 const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
 if(SpeechRecognition){
-  const mic=$("#micBtn"); let recognition=null; let listening=false; let hasSearched=false;
-  mic.onclick=()=>{
-    if(listening){recognition.stop();return;}
+  const mic=$("#micBtn"), overlay=$("#voiceOverlay"), vStatus=$("#voiceStatus"), vTranscript=$("#voiceTranscript"), vCancel=$("#voiceCancel"), vRing=$("#voiceMicRing");
+  let recognition=null, vListening=false, hasSearched=false;
+
+  function voiceOpen(){
+    hasSearched=false; vTranscript.textContent=""; vStatus.textContent="Bolo kya banana hai...";
+    overlay.className="voice-overlay show listening";
     recognition=new SpeechRecognition();
     recognition.lang="hi-IN"; recognition.continuous=true; recognition.interimResults=true; recognition.maxAlternatives=3;
-    hasSearched=false;
-    recognition.onstart=()=>{listening=true;mic.classList.add("listening");$("#search").placeholder="Bolo... 🎤";};
+    recognition.onstart=()=>{vListening=true; mic.classList.add("listening");};
     recognition.onresult=(e)=>{
       let final="",interim="";
       for(let i=0;i<e.results.length;i++){if(e.results[i].isFinal)final+=e.results[i][0].transcript;else interim+=e.results[i][0].transcript;}
       const text=(final+interim).trim();
-      $("#search").value=text; STATE.query=text; $("#searchClear").classList.add("show");
-      if(final){hasSearched=true;recognition.stop();doSearch();}
+      vTranscript.textContent=text;
+      if(final){
+        hasSearched=true;
+        $("#search").value=final.trim(); STATE.query=final.trim(); $("#searchClear").classList.add("show");
+        overlay.className="voice-overlay show processing"; vStatus.textContent="Searching...";
+        recognition.stop();
+      }
     };
     recognition.onend=()=>{
-      listening=false;mic.classList.remove("listening");$("#search").placeholder="Search for products";
-      if(!hasSearched&&STATE.query.trim()){doSearch();}
+      vListening=false; mic.classList.remove("listening");
+      const q=(vTranscript.textContent||"").trim();
+      if(!hasSearched&&q){ $("#search").value=q; STATE.query=q; $("#searchClear").classList.add("show"); hasSearched=true; }
+      if(hasSearched){ setTimeout(()=>{ overlay.className="voice-overlay"; doSearch(); },350); }
+      else{ overlay.className="voice-overlay"; }
     };
-    recognition.onerror=(e)=>{listening=false;mic.classList.remove("listening");$("#search").placeholder="Search for products";if(e.error!=="aborted"&&e.error!=="no-speech")toast("Voice not available — try typing");};
+    recognition.onerror=(e)=>{
+      vListening=false; mic.classList.remove("listening");
+      if(e.error==="aborted"||e.error==="no-speech"){ overlay.className="voice-overlay"; return; }
+      overlay.className="voice-overlay"; toast("Voice not available — try typing");
+    };
     recognition.start();
-  };
-}else{$("#micBtn").style.display="none";}
+  }
+  function voiceClose(){ if(vListening&&recognition){hasSearched=false;recognition.abort();} overlay.className="voice-overlay"; vListening=false; mic.classList.remove("listening"); }
+
+  mic.onclick=()=>{ if(vListening){voiceClose();return;} voiceOpen(); };
+  vRing.onclick=()=>{ if(vListening){recognition.stop();} };
+  vCancel.onclick=voiceClose;
+}else{$("#micBtn").style.display="none"; $("#voiceOverlay").style.display="none";}
 $("#searchClear").onclick=()=>{$("#search").value="";STATE.query="";$("#searchClear").classList.remove("show");$("#aclist").classList.remove("show");doSearch();$("#search").focus();};
 $("#locBtn").onclick=openModal;$("#cartBtn").onclick=openDrawer;$("#cartbarGo").onclick=openDrawer;$("#cartClose").onclick=closeModal;$("#scrim").onclick=closeModal;$("#pinCheck").onclick=checkPin;$("#pinInput").addEventListener("keydown",(e)=>{if(e.key==="Enter")checkPin();});
 $("#placeOrder").onclick=()=>{if(cartArr().length===0){toast("Cart khaali hai");return;}STATE.cart={};saveCart();renderCart();closeModal();toast("Order placed — arriving in 10 min! 🎉");doSearch();};
