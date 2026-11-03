@@ -1,0 +1,24 @@
+{
+  "dishes": {
+    "paneer_butter_masala": {
+      "label": "Paneer Butter Masala",
+      "names": ["paneer butter masala", "butter paneer", "paneer makhani"],
+      "ingredients": ["paneer", "butter", "tomato", "cream"]
+    },
+    "pulao": {
+      "label": "Veg Pulao",
+      "names": ["pulav", "pulao", "veg pulav", "veg pulao"],
+      "ingredients": ["rice", "potato", "oil"]
+    },
+    "chai": {
+      "label": "Chai",
+      "names": ["chai", "cutting chai", "garam chai"],
+      "ingredients": ["tea", "milk", "sugar"]
+    },
+    "aloo_paratha": {
+      "label": "Aloo Paratha",
+      "names": ["aloo paratha", "alu paratha", "aloo parantha"],
+      "ingredients": ["potato", "atta", "oil"]
+    }
+  }
+}

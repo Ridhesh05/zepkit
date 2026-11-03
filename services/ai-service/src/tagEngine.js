@@ -73,7 +73,7 @@ export function normalize(s) {
 const has = (text, term) => ` ${text} `.includes(` ${term} `);
 export const isLatin = (t) => /^[a-z0-9 ]+$/.test(t);
 
-function editDistance(a, b) {
+export function editDistance(a, b) {
   const d = Array.from({ length: a.length + 1 }, (_, i) => [i, ...Array(b.length).fill(0)]);
   for (let j = 1; j <= b.length; j++) d[0][j] = j;
   for (let i = 1; i <= a.length; i++) {
@@ -85,7 +85,7 @@ function editDistance(a, b) {
   return d[a.length][b.length];
 }
 
-function fuzzyFind(text, terms, maxTypos) {
+export function fuzzyFind(text, terms, maxTypos) {
   const words = text.split(" ");
   let best = null;
   for (const term of terms) {

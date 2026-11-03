@@ -25,6 +25,9 @@
     "toothpaste": { "hindi": ["toothpaste", "manjan", "colgate"], "english": ["toothpaste", "tooth paste"], "typos": ["toothpest", "tuthpaste"], "brands": ["colgate", "closeup", "pepsodent", "dabur", "sensodyne"], "all_langs": { "Hindi": ["टूथपेस्ट"] } },
     "coffee": { "hindi": ["coffee", "kofi"], "english": ["coffee", "instant coffee"], "typos": ["cofee", "coffe"], "brands": ["nescafe", "bru", "sunrise"], "all_langs": { "Hindi": ["कॉफ़ी"] } },
     "ghee": { "hindi": ["ghee", "ghi"], "english": ["ghee", "clarified butter"], "typos": ["ghii", "gheee"], "brands": ["amul", "patanjali", "gowardhan", "mother dairy"], "all_langs": { "Hindi": ["घी"] } },
-    "honey": { "hindi": ["shahad", "shehad"], "english": ["honey"], "typos": ["honi", "hony"], "brands": ["dabur", "patanjali", "apis", "zandu"], "all_langs": { "Hindi": ["शहद"] } }
+    "honey": { "hindi": ["shahad", "shehad"], "english": ["honey"], "typos": ["honi", "hony"], "brands": ["dabur", "patanjali", "apis", "zandu"], "all_langs": { "Hindi": ["शहद"] } },
+    "butter": { "hindi": ["makhan"], "english": ["butter"], "typos": ["btter", "buttr"], "brands": ["amul", "britannia", "nutralite"], "all_langs": { "Hindi": ["मक्खन"] } },
+    "tomato": { "hindi": ["tamatar"], "english": ["tomato", "tomatoes"], "typos": ["tomatoe", "tomaato"], "brands": ["fresh", "farm", "organic"], "all_langs": { "Hindi": ["टमाटर"] } },
+    "cream": { "hindi": ["malai"], "english": ["cream", "fresh cream"], "typos": ["creem", "craem"], "brands": ["amul", "nestle", "britannia"], "all_langs": { "Hindi": ["मलाई"] } }
   }
 }

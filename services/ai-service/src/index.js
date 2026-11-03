@@ -3,6 +3,7 @@ import { config } from "@zepkit/common";
 import { logger } from "./lib/logger.js";
 import embedRoutes from "./routes/embed.js";
 import tagRoutes from "./routes/tags.js";
+import recipeRoutes from "./routes/recipe.js";
 
 const app = express();
 app.use(express.json({ limit: "1mb" }));
@@ -11,6 +12,7 @@ app.get("/health", (_req, res) => res.json({ ok: true, service: "ai-service", mo
 
 app.use("/ai", embedRoutes);
 app.use("/ai", tagRoutes);
+app.use("/ai", recipeRoutes);
 
 app.use((err, _req, res, _next) => {
   logger.error(err);

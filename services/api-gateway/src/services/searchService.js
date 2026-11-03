@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { getTypesense, getRedis, getDb, config, logger, makeEvent, EventType } from "@zepkit/common";
-import { embedQuery } from "../lib/aiClient.js";
+import { embedQuery, detectRecipe } from "../lib/aiClient.js";
 import { publish } from "../lib/producer.js";
 
 const COLL = config.typesense.collection;
@@ -46,8 +46,32 @@ async function run(params) {
   return res.results[0];
 }
 
-export async function search({ q = "", store, category, perPage = 40 }) {
+export async function search({ q = "", store, category, perPage = 40, detectIntent = true }) {
   const t0 = Date.now();
+
+  // Recipe/intent detection: "paneer butter masala banana hai" → resolve each ingredient to a
+  // real product instead of a single flat keyword/vector match. Only on top-level calls (not the
+  // per-ingredient lookups recipeSearch() itself makes — detectIntent:false avoids recursion).
+  if (detectIntent && q.trim() && !category) {
+    let recipe = null;
+    try {
+      recipe = await detectRecipe(q);
+    } catch {
+      /* ai-service unreachable → fail closed, fall through to normal search */
+    }
+    if (recipe?.isRecipe) {
+      const ingredients = await recipeSearch(recipe.dish, recipe.ingredients, store);
+      const results = ingredients.map((i) => i.product).filter(Boolean);
+      const out = {
+        query: q, cleanQuery: q, priceMax: null, priceMin: null, store, category: null,
+        mode: "recipe", missed: false, count: results.length, results, ms: Date.now() - t0,
+        recipe: { dish: recipe.dish, ingredients },
+      };
+      logSearch(q, store, results.length, false);
+      return out;
+    }
+  }
+
   const { max, min, q: cleanQ } = parsePrice(q);
   const priceFilter = [];
   if (max != null) priceFilter.push(`price:<=${max}`);
@@ -82,6 +106,21 @@ export async function search({ q = "", store, category, perPage = 40 }) {
   await redis.set(cacheKey, JSON.stringify(out), "EX", 60);
   logSearch(q, store, results.length, missed);
   return out;
+}
+
+// Resolve each recipe ingredient to a real in-stock product via the existing search() pipeline.
+// Each inner call still runs the full hybrid-search + cache + logSearch() path — a missed
+// ingredient (e.g. "cream" if it weren't in the catalog) lands in search_logs and shows up in the
+// admin "missed searches" tab automatically, with no extra logging code needed here.
+export async function recipeSearch(_dish, ingredients, store) {
+  const hits = await Promise.all(
+    ingredients.map((term) => search({ q: term, store, perPage: 5, detectIntent: false })),
+  );
+  return ingredients.map((term, i) => {
+    const list = hits[i].results || [];
+    const product = list.find((p) => p.inStock) ?? list[0] ?? null;
+    return { term, product };
+  });
 }
 
 export async function resolveLocation(pincode) {

@@ -48,6 +48,9 @@ const DEFS = [
   { cat: "coffee", label: "Coffee", brands: ["Nescafe", "Bru", "Sunrise"], sizes: ["50g", "200g"], prices: [150, 490] },
   { cat: "ghee", label: "Ghee", brands: ["Amul", "Patanjali", "Gowardhan", "Mother Dairy"], sizes: ["500ml", "1L"], prices: [320, 630] },
   { cat: "honey", label: "Honey", brands: ["Dabur", "Patanjali", "Apis", "Zandu"], sizes: ["250g", "500g"], prices: [150, 280] },
+  { cat: "butter", label: "Butter", brands: ["Amul", "Britannia", "Nutralite"], sizes: ["100g", "500g"], prices: [52, 235] },
+  { cat: "tomato", label: "Tamatar", brands: ["Fresh", "Farm", "Organic"], sizes: ["1kg", "500g"], prices: [35, 18] },
+  { cat: "cream", label: "Fresh Cream", brands: ["Amul", "Nestle", "Britannia"], sizes: ["200ml", "1L"], prices: [60, 250] },
 ];
 
 const rnd = (n) => Math.floor(Math.random() * n);

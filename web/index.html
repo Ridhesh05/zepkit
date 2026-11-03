@@ -83,6 +83,17 @@
   .note{font-size:13px; color:var(--primary-ink); background:var(--primary-soft); padding:3px 10px; border-radius:8px; font-weight:600}
   .demo-tag{font-size:11px; color:var(--muted); border:1px dashed var(--border-strong); padding:2px 8px; border-radius:7px}
 
+  .recipe-card{background:var(--surface); border:1.5px solid var(--primary); border-radius:var(--radius); padding:18px 20px; margin:14px 0; box-shadow:var(--shadow-md)}
+  .rc-head{font-family:"Outfit"; font-weight:800; font-size:18px; letter-spacing:-.01em; margin-bottom:10px}
+  .rc-rows{display:flex; flex-direction:column; gap:2px; margin-bottom:14px}
+  .rrow{display:flex; align-items:center; gap:10px; padding:9px 2px; border-bottom:1px solid var(--border)}
+  .rrow:last-child{border-bottom:0}
+  .rrow .ic{font-size:20px; width:28px; text-align:center; flex:none}
+  .rrow .nm{flex:1; font-size:14px; font-weight:600; text-transform:capitalize}
+  .rrow .st{font-family:"Outfit"; font-weight:700; font-size:14px}
+  .rrow.miss .nm{color:var(--muted)} .rrow.miss .st{color:var(--faint); font-weight:500; font-size:12.5px}
+  .rc-addall{width:100%; height:46px; border-radius:11px; font-size:14.5px}
+
   .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(155px,1fr)); gap:14px; margin-top:8px}
   @keyframes rise{from{opacity:0; transform:translateY(12px)} to{opacity:1; transform:none}}
   .card{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:10px; display:flex; flex-direction:column; gap:8px; box-shadow:var(--shadow-sm); transition:transform .14s, box-shadow .14s, border-color .14s; animation:rise .36s cubic-bezier(.2,.7,.3,1) both}
@@ -173,6 +184,7 @@
       <span class="spacer"></span>
       <span class="demo-tag" id="demoTag" hidden>demo data (API offline)</span>
     </div>
+    <div class="recipe-card" id="recipeCard" hidden></div>
     <div class="grid" id="grid"></div>
   </main>
 
@@ -196,11 +208,11 @@
 <script>
 const $=(s)=>document.querySelector(s);
 const money=(n)=>`<span class="rupee">₹</span>${Math.round(n)}`;
-const CAT={salt:{e:"🧂",l:"Salt"},milk:{e:"🥛",l:"Dairy"},atta:{e:"🌾",l:"Atta"},rice:{e:"🍚",l:"Rice"},sugar:{e:"🍬",l:"Sugar"},tea:{e:"🍵",l:"Tea"},biscuit:{e:"🍪",l:"Biscuits"},soap:{e:"🧼",l:"Soap"},shampoo:{e:"🧴",l:"Care"},potato:{e:"🥔",l:"Veggies"},oil:{e:"🛢️",l:"Oil"},bread:{e:"🍞",l:"Bread"},paneer:{e:"🧀",l:"Paneer"},curd:{e:"🥣",l:"Curd"},noodles:{e:"🍜",l:"Noodles"},namkeen:{e:"🥨",l:"Namkeen"},chips:{e:"🍟",l:"Chips"},chocolate:{e:"🍫",l:"Chocolate"},softdrink:{e:"🥤",l:"Drinks"},water:{e:"💧",l:"Water"},detergent:{e:"🧺",l:"Detergent"},toothpaste:{e:"🪥",l:"Oral"},coffee:{e:"☕",l:"Coffee"},ghee:{e:"🫙",l:"Ghee"},honey:{e:"🍯",l:"Honey"},generic:{e:"🛒",l:"More"}};
+const CAT={salt:{e:"🧂",l:"Salt"},milk:{e:"🥛",l:"Dairy"},atta:{e:"🌾",l:"Atta"},rice:{e:"🍚",l:"Rice"},sugar:{e:"🍬",l:"Sugar"},tea:{e:"🍵",l:"Tea"},biscuit:{e:"🍪",l:"Biscuits"},soap:{e:"🧼",l:"Soap"},shampoo:{e:"🧴",l:"Care"},potato:{e:"🥔",l:"Veggies"},oil:{e:"🛢️",l:"Oil"},bread:{e:"🍞",l:"Bread"},paneer:{e:"🧀",l:"Paneer"},curd:{e:"🥣",l:"Curd"},noodles:{e:"🍜",l:"Noodles"},namkeen:{e:"🥨",l:"Namkeen"},chips:{e:"🍟",l:"Chips"},chocolate:{e:"🍫",l:"Chocolate"},softdrink:{e:"🥤",l:"Drinks"},water:{e:"💧",l:"Water"},detergent:{e:"🧺",l:"Detergent"},toothpaste:{e:"🪥",l:"Oral"},coffee:{e:"☕",l:"Coffee"},ghee:{e:"🫙",l:"Ghee"},honey:{e:"🍯",l:"Honey"},butter:{e:"🧈",l:"Butter"},tomato:{e:"🍅",l:"Tomato"},cream:{e:"🍶",l:"Cream"},generic:{e:"🛒",l:"More"}};
 const emoji=(c)=>(CAT[c]?.e)||"🛒";
-const HUE={salt:220,milk:210,atta:38,rice:46,sugar:330,tea:150,biscuit:30,soap:188,shampoo:285,potato:40,oil:48,bread:28,paneer:50,curd:205,noodles:16,namkeen:14,chips:42,chocolate:22,softdrink:350,water:195,detergent:225,toothpaste:172,coffee:24,ghee:44,honey:40,generic:270};
+const HUE={salt:220,milk:210,atta:38,rice:46,sugar:330,tea:150,biscuit:30,soap:188,shampoo:285,potato:40,oil:48,bread:28,paneer:50,curd:205,noodles:16,namkeen:14,chips:42,chocolate:22,softdrink:350,water:195,detergent:225,toothpaste:172,coffee:24,ghee:44,honey:40,butter:45,tomato:6,cream:35,generic:270};
 const catTint=(c)=>{const h=HUE[c]??270;return `linear-gradient(140deg, color-mix(in srgb, hsl(${h} 90% 58%) 15%, var(--surface)), color-mix(in srgb, hsl(${h} 90% 58%) 32%, var(--surface)))`;};
-const EXAMPLES=["doodh","பால்","mujhe chai peeni hai","amul doodh 60 se kam","pulav khana hai","சோப்பு"];
+const EXAMPLES=["doodh","பால்","paneer butter masala banana hai","mujhe chai peeni hai","amul doodh 60 se kam","pulav khana hai","சோப்பு"];
 const SAMPLE_STORES=[{id:"S1",name:"Andheri",pincodes:["400053"]}];
 const SAMPLE=[{id:"s1",title:"Tata Salt 1kg",category:"salt",veg:true,price:22,stock:40,inStock:true},{id:"s2",title:"Amul Milk 500ml",category:"milk",veg:true,price:29,stock:25,inStock:true},{id:"s3",title:"Maggi Noodles 70g",category:"noodles",veg:true,price:14,stock:90,inStock:true},{id:"s4",title:"Lays Chips 52g",category:"chips",veg:true,price:20,stock:70,inStock:true},{id:"s5",title:"Cadbury Chocolate 100g",category:"chocolate",veg:true,price:90,stock:40,inStock:true},{id:"s6",title:"Coca Cola Cold Drink 750ml",category:"softdrink",veg:true,price:40,stock:60,inStock:true},{id:"s7",title:"Dove Soap 100g",category:"soap",veg:true,price:45,stock:0,inStock:false},{id:"s8",title:"Fresh Aloo 1kg",category:"potato",veg:true,price:30,stock:60,inStock:true},{id:"s9",title:"Amul Paneer 200g",category:"paneer",veg:true,price:85,stock:18,inStock:true},{id:"s10",title:"Surf Excel Detergent 1kg",category:"detergent",veg:true,price:120,stock:33,inStock:true}];
 
@@ -235,13 +247,37 @@ async function doSearch(){
 function splitTitle(t){const m=t.match(/^(.*?)(\s+\d+(?:\.\d+)?\s?(?:kg|g|gm|ml|l|ltr|pcs?|pack)s?)$/i);return m?{name:m[1],pack:m[2].trim()}:{name:t,pack:""};}
 
 function render(data){
-  const {results=[],mode,count,ms}=data;
-  $("#resultTitle").textContent=STATE.query?`Results for “${STATE.query}”`:(STATE.category?CAT[STATE.category]?.l||STATE.category:"Popular near you");
+  const {results=[],mode,count,ms,recipe}=data;
+  const rc=$("#recipeCard");
+  if(recipe){ renderRecipeCard(recipe); rc.hidden=false; } else { rc.hidden=true; }
+  $("#resultTitle").textContent = recipe ? `🍳 ${recipe.dish} — ingredients` : STATE.query?`Results for “${STATE.query}”`:(STATE.category?CAT[STATE.category]?.l||STATE.category:"Popular near you");
   $("#resultMeta").textContent=`${count} result${count===1?"":"s"}${ms!=null?` · ${ms} ms`:""}${STATE.storeName?` · ${STATE.storeName}`:""}`;
   const note=$("#resultNote"); if(mode==="closest"){note.hidden=false;note.textContent="No exact match — closest items";}else note.hidden=true;
   const grid=$("#grid");
   if(results.length===0){ grid.innerHTML=`<div class="empty" style="grid-column:1/-1"><div class="big">🔍</div><h3>Kuch nahi mila</h3><p>Try another spelling or term — hum Hindi, Tamil, Bangla sab samajhte hain.</p></div>`; return; }
   grid.innerHTML=""; results.forEach((p,i)=>{const c=card(p);c.style.animationDelay=Math.min(i*0.022,0.5)+"s";grid.appendChild(c);});
+}
+function renderRecipeCard(recipe){
+  const el=$("#recipeCard");
+  const rows=recipe.ingredients.map(({term,product})=>{
+    if(!product) return `<div class="rrow miss"><span class="ic">🛒</span><span class="nm">${term}</span><span class="st">Not available at this store</span></div>`;
+    const {name}=splitTitle(product.title);
+    return `<div class="rrow"><span class="ic">${emoji(product.category)}</span><span class="nm">${name}</span><span class="st num">${money(product.price)}</span></div>`;
+  }).join("");
+  const n=recipe.ingredients.filter(i=>i.product).length;
+  el.innerHTML=`<div class="rc-head">🍳 ${recipe.dish}</div><div class="rc-rows">${rows}</div>
+    <button class="add rc-addall" ${n===0?"disabled":""}>Add all to cart (${n})</button>`;
+  const btn=el.querySelector(".rc-addall");
+  if(n>0) btn.onclick=()=>{
+    let added=0;
+    recipe.ingredients.forEach(({product:p})=>{
+      if(!p) return;
+      STATE.cart[p.id]={id:p.id,title:p.title,category:p.category,price:p.price,qty:(STATE.cart[p.id]?.qty||0)+1};
+      track("add",{productId:p.id}); added++;
+    });
+    saveCart(); renderCart();
+    toast(`${added} item${added===1?"":"s"} added to cart`);
+  };
 }
 function card(p){
   const {name,pack}=splitTitle(p.title); const d=disc(p.id); const mrp=Math.round(p.price/(1-d/100));
