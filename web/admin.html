@@ -123,6 +123,7 @@
       <button class="nav" data-v="add"><span class="i">＋</span> Add product</button>
       <button class="nav" data-v="searches"><span class="i">🔍</span> Searches</button>
       <button class="nav" data-v="perf"><span class="i">📈</span> Load test</button>
+      <button class="nav" data-v="index"><span class="i">🗂️</span> Index</button>
       <button class="nav" data-v="locations"><span class="i">📍</span> Locations</button>
     </nav>
     <div class="side-foot">
@@ -196,6 +197,18 @@
 RATE=50 DURATION=30s ADMIN_KEY=zepkit-admin-2024 k6 run k6/search-load.js</pre><div class="muted">k6's handleSummary POSTs the result to this dashboard — no copy-paste needed.</div></div>
     </section>
 
+    <!-- INDEX (TypeSense) -->
+    <section class="panel" id="v-index">
+      <div class="head"><div><h1>Search index</h1><div class="sub">Live TypeSense index — browsed straight from this app, no third-party dashboard needed.</div></div>
+        <button class="btn" id="runReindex">↻ Run reindex (zero-downtime)</button></div>
+      <div class="tiles" id="idxTiles"></div>
+      <div class="card"><label>Physical collections</label><div class="muted" style="margin-bottom:6px">The alias <code>products</code> always points at the <b>live</b> one. Reindex builds a new one, swaps the alias, then deletes old ones — searches never see a gap.</div><div id="idxCols"></div></div>
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px"><label style="margin:0">Browse documents</label><input type="text" id="idxSearch" placeholder="filter by title/tag…" style="width:220px;height:36px"></div>
+        <div id="idxDocs" style="overflow-x:auto"></div>
+      </div>
+    </section>
+
     <!-- LOCATIONS -->
     <section class="panel" id="v-locations">
       <div class="head"><div><h1>Locations</h1><div class="sub">Dark stores and the pincodes they serve.</div></div></div>
@@ -229,7 +242,7 @@ function updateKeyStatus(ok){ $("#keyStatus").textContent=ok?"🔑 Admin key sav
 let tT; function toast(m){ const t=$("#toast"); t.textContent=m; t.classList.add("show"); clearTimeout(tT); tT=setTimeout(()=>t.classList.remove("show"),2400); }
 
 // nav
-$$(".nav").forEach(b=>b.onclick=()=>{ const v=b.dataset.v; $$(".nav").forEach(n=>n.setAttribute("aria-selected",n===b)); $$(".panel").forEach(p=>p.classList.remove("show")); $("#v-"+v).classList.add("show"); if(v==="overview") loadOverview(); if(v==="searches") loadSearches(); if(v==="locations") loadLocations(); if(v==="add") initAdd(); if(v==="perf") loadPerf(); });
+$$(".nav").forEach(b=>b.onclick=()=>{ const v=b.dataset.v; $$(".nav").forEach(n=>n.setAttribute("aria-selected",n===b)); $$(".panel").forEach(p=>p.classList.remove("show")); $("#v-"+v).classList.add("show"); if(v==="overview") loadOverview(); if(v==="searches") loadSearches(); if(v==="locations") loadLocations(); if(v==="add") initAdd(); if(v==="perf") loadPerf(); if(v==="index") loadIndex(); });
 
 // ---------- overview ----------
 $("#refresh").onclick=loadOverview; $("#aStore").onchange=loadOverview;
@@ -320,6 +333,30 @@ async function loadSearches(){
 
 // ---------- locations ----------
 async function loadLocations(){ if(!STORES.length) STORES=await api("/stores"); $("#locList").innerHTML=STORES.map(s=>`<div class="lrow"><span class="q">📍 ${s.name} <span class="muted">(${s.id})</span></span><span class="muted">${(s.pincodes||[]).join(", ")}</span></div>`).join(""); }
+
+// ---------- index (typesense) ----------
+async function loadIndex(){
+  let info; try{ info=await api("/admin/index"); }catch(e){ toast("Index: "+e.message); return; }
+  $("#idxTiles").innerHTML="";
+  const live=info.collections.find(c=>c.live);
+  const tiles=[["Live collection",live?live.name.replace(/^products_?/,"")||"products":"—"],["Documents indexed",live?live.numDocuments:0],["Physical collections",info.collections.length]];
+  tiles.forEach(([k,n])=>{ const t=document.createElement("div"); t.className="tile"; t.innerHTML=`<div class="k">${k}</div><div class="n">${n}</div>`; $("#idxTiles").appendChild(t); });
+  $("#idxCols").innerHTML = info.collections.length? `<table><thead><tr><th>Collection</th><th>Documents</th><th>Status</th></tr></thead><tbody>${info.collections.map(c=>`<tr><td>${c.name}</td><td class="num">${c.numDocuments}</td><td>${c.live?'<span class="pill ok">● live</span>':'<span class="pill">old</span>'}</td></tr>`).join("")}</tbody></table>` : `<div class="muted">No collections yet — run the seed script.</div>`;
+  loadIndexDocs();
+}
+let idxT;
+$("#idxSearch").addEventListener("input",()=>{ clearTimeout(idxT); idxT=setTimeout(loadIndexDocs,300); });
+async function loadIndexDocs(){
+  let d; try{ d=await api(`/admin/index/documents?q=${encodeURIComponent($("#idxSearch").value.trim())}&limit=20`); }catch(e){ return; }
+  const docs=d.documents||[];
+  $("#idxDocs").innerHTML = docs.length? `<table><thead><tr><th>Title</th><th>Category</th><th>Price</th><th>Stock</th><th>Stores</th></tr></thead><tbody>${docs.map(doc=>`<tr><td>${doc.title}</td><td>${doc.category}</td><td class="num">₹${doc.price}</td><td class="num">${doc.stock}</td><td class="muted">${(doc.store_ids||[]).length}</td></tr>`).join("")}</tbody></table>` : `<div class="muted">No documents found.</div>`;
+}
+$("#runReindex").onclick=async()=>{
+  const btn=$("#runReindex"); btn.disabled=true; btn.textContent="Reindexing…";
+  try{ const r=await api("/admin/reindex",{method:"POST"}); toast(`Reindexed ${r.imported}/${r.total} · alias → new collection ✓`); loadIndex(); }
+  catch(e){ toast("Reindex failed: "+e.message); }
+  finally{ btn.disabled=false; btn.textContent="↻ Run reindex (zero-downtime)"; }
+};
 
 // ---------- load test ----------
 $("#perfRefresh").onclick=loadPerf;

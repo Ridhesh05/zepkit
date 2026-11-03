@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { search, resolveLocation, listStores, listCategories, analytics, mapAlias, logEvent, saveLoadTest, getLoadTests } from "../services/searchService.js";
+import { indexInfo, browseDocuments, runReindex } from "../../../../infra/typesense/reindex.js";
 import { requireAdmin } from "../middleware/requireAdmin.js";
 
 const router = Router();
@@ -55,6 +56,21 @@ router.post("/admin/loadtest", requireAdmin, async (req, res) => {
 });
 router.get("/admin/loadtest", requireAdmin, async (_req, res) => {
   try { return res.json(await getLoadTests()); }
+  catch (err) { return res.status(502).json({ error: err.message }); }
+});
+
+// Index tab — browse the live TypeSense index without any third-party dashboard (avoids the
+// HTTPS-dashboard → HTTP-localhost mixed-content block entirely, since this is same-origin).
+router.get("/admin/index", requireAdmin, async (_req, res) => {
+  try { return res.json(await indexInfo()); }
+  catch (err) { return res.status(502).json({ error: err.message }); }
+});
+router.get("/admin/index/documents", requireAdmin, async (req, res) => {
+  try { return res.json({ documents: await browseDocuments({ q: req.query.q || "", limit: Number(req.query.limit) || 20 }) }); }
+  catch (err) { return res.status(502).json({ error: err.message }); }
+});
+router.post("/admin/reindex", requireAdmin, async (_req, res) => {
+  try { return res.json(await runReindex()); }
   catch (err) { return res.status(502).json({ error: err.message }); }
 });
 

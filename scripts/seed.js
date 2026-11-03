@@ -4,9 +4,9 @@
  * (instant, no LLM); the worker embeds + indexes each. Products go through the real API pipeline.
  *   node scripts/seed.js
  */
-import { config, getDb, getRedis, getTypesense, closeMongo, closeRedis, logger } from "@zepkit/common";
+import { config, getDb, getRedis, closeMongo, closeRedis, logger } from "@zepkit/common";
 import { ruleOnly, splitTags } from "../services/ai-service/src/tagEngine.js";
-import { ensureCollection } from "../infra/typesense/schema.js";
+import { resetCollection } from "../infra/typesense/schema.js";
 
 const API = `http://localhost:${config.ports.api}/products`;
 const TARGET = 250;
@@ -96,8 +96,7 @@ async function post(product) {
   await db.collection("products").deleteMany({});
   await db.collection("inventory").deleteMany({});
   await db.collection("dark_stores").deleteMany({});
-  try { await getTypesense().collections(config.typesense.collection).delete(); } catch { /* not there */ }
-  await ensureCollection();
+  await resetCollection();
   await getRedis().flushdb();
   logger.info("cleared products / inventory / stores / index / cache");
 
