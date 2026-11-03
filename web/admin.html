@@ -76,6 +76,7 @@
   .lrow{display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid var(--border); font-size:14px}
   .lrow .q{flex:1; font-weight:600} .lrow .c{font-family:"Outfit"; font-weight:700}
   .muted{color:var(--muted); font-size:13px}
+  pre{background:var(--surface-2); border:1px solid var(--border); border-radius:10px; padding:12px 14px; font-size:12.5px; line-height:1.55; overflow-x:auto; font-family:ui-monospace,"SF Mono",monospace; color:var(--ink); margin:6px 0}
 
   /* add product */
   .addgrid{display:grid; grid-template-columns:1fr 1.15fr; gap:16px; align-items:start} @media(max-width:920px){.addgrid{grid-template-columns:1fr}}
@@ -121,6 +122,7 @@
       <button class="nav" data-v="overview" aria-selected="true"><span class="i">▦</span> Overview</button>
       <button class="nav" data-v="add"><span class="i">＋</span> Add product</button>
       <button class="nav" data-v="searches"><span class="i">🔍</span> Searches</button>
+      <button class="nav" data-v="perf"><span class="i">📈</span> Load test</button>
       <button class="nav" data-v="locations"><span class="i">📍</span> Locations</button>
     </nav>
     <div class="side-foot">
@@ -182,6 +184,18 @@
       <div class="card"><label>Top searches</label><div id="topList2"></div></div>
     </section>
 
+    <!-- LOAD TEST -->
+    <section class="panel" id="v-perf">
+      <div class="head"><div><h1>Load test</h1><div class="sub">Real throughput + latency from k6, run against the live search API.</div></div><button class="btn sm" id="perfRefresh">Refresh</button></div>
+      <div class="tiles" id="perfTiles"></div>
+      <div class="muted" id="perfWhen" style="margin:2px 2px 14px"></div>
+      <div class="card" id="perfEmpty" style="display:none"><label>No load test yet</label><div class="muted">Run k6 and the numbers appear here automatically.</div></div>
+      <div class="card"><label>Recent runs</label><div id="perfHist"></div></div>
+      <div class="card"><label>How to run</label><pre>brew install k6                     # once
+# services running + seeded, then:
+RATE=50 DURATION=30s ADMIN_KEY=zepkit-admin-2024 k6 run k6/search-load.js</pre><div class="muted">k6's handleSummary POSTs the result to this dashboard — no copy-paste needed.</div></div>
+    </section>
+
     <!-- LOCATIONS -->
     <section class="panel" id="v-locations">
       <div class="head"><div><h1>Locations</h1><div class="sub">Dark stores and the pincodes they serve.</div></div></div>
@@ -215,7 +229,7 @@ function updateKeyStatus(ok){ $("#keyStatus").textContent=ok?"🔑 Admin key sav
 let tT; function toast(m){ const t=$("#toast"); t.textContent=m; t.classList.add("show"); clearTimeout(tT); tT=setTimeout(()=>t.classList.remove("show"),2400); }
 
 // nav
-$$(".nav").forEach(b=>b.onclick=()=>{ const v=b.dataset.v; $$(".nav").forEach(n=>n.setAttribute("aria-selected",n===b)); $$(".panel").forEach(p=>p.classList.remove("show")); $("#v-"+v).classList.add("show"); if(v==="overview") loadOverview(); if(v==="searches") loadSearches(); if(v==="locations") loadLocations(); if(v==="add") initAdd(); });
+$$(".nav").forEach(b=>b.onclick=()=>{ const v=b.dataset.v; $$(".nav").forEach(n=>n.setAttribute("aria-selected",n===b)); $$(".panel").forEach(p=>p.classList.remove("show")); $("#v-"+v).classList.add("show"); if(v==="overview") loadOverview(); if(v==="searches") loadSearches(); if(v==="locations") loadLocations(); if(v==="add") initAdd(); if(v==="perf") loadPerf(); });
 
 // ---------- overview ----------
 $("#refresh").onclick=loadOverview; $("#aStore").onchange=loadOverview;
@@ -306,6 +320,19 @@ async function loadSearches(){
 
 // ---------- locations ----------
 async function loadLocations(){ if(!STORES.length) STORES=await api("/stores"); $("#locList").innerHTML=STORES.map(s=>`<div class="lrow"><span class="q">📍 ${s.name} <span class="muted">(${s.id})</span></span><span class="muted">${(s.pincodes||[]).join(", ")}</span></div>`).join(""); }
+
+// ---------- load test ----------
+$("#perfRefresh").onclick=loadPerf;
+async function loadPerf(){
+  let d; try{ d=await api("/admin/loadtest"); }catch(e){ return; }
+  const l=d.latest;
+  if(!l){ $("#perfTiles").innerHTML=""; $("#perfWhen").textContent=""; $("#perfEmpty").style.display="block"; $("#perfHist").innerHTML=`<div class="muted">No runs yet.</div>`; return; }
+  $("#perfEmpty").style.display="none";
+  const tiles=[["Throughput",l.reqsPerSec+" /s"],["p50 latency",l.p50+" ms"],["p95 latency",l.p95+" ms"],["p99 latency",l.p99+" ms"],["Error rate",l.errorRate+"%",l.errorRate>0?"bad":"good"],["Target rate",l.rateTarget+" /s"]];
+  $("#perfTiles").innerHTML=tiles.map(([k,n,cls])=>`<div class="tile"><div class="k">${k}</div><div class="n ${cls||""}">${n}</div></div>`).join("");
+  $("#perfWhen").textContent=`Last run: ${new Date(l.ts).toLocaleString()} · ${l.totalReqs} requests over ${l.duration} · ${l.vus||"?"} VUs · avg ${l.avg}ms · max ${l.max}ms`;
+  $("#perfHist").innerHTML=`<table><thead><tr><th>When</th><th>Target</th><th>req/s</th><th>p50</th><th>p95</th><th>p99</th><th>err%</th></tr></thead><tbody>`+d.history.map(r=>`<tr><td>${new Date(r.ts).toLocaleString()}</td><td>${r.rateTarget}/s</td><td>${r.reqsPerSec}</td><td>${r.p50}</td><td>${r.p95}</td><td>${r.p99}</td><td>${r.errorRate}</td></tr>`).join("")+`</tbody></table>`;
+}
 
 $("#gateBtn").onclick=async()=>{ const k=$("#gateKey").value.trim(); if(!k){ $("#gateMsg").textContent="Enter a key"; $("#gateMsg").className="gatemsg err"; return; } $("#gateMsg").className="gatemsg"; $("#gateMsg").textContent="checking…"; if(await verifyKey(k)){ ADMIN_KEY=k; localStorage.setItem("zk_admin_key",k); hideGate(); updateKeyStatus(true); boot(); } else { $("#gateMsg").textContent="Invalid key — try again"; $("#gateMsg").className="gatemsg err"; } };
 $("#gateKey").addEventListener("keydown",e=>{ if(e.key==="Enter") $("#gateBtn").click(); });

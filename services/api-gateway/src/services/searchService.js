@@ -181,6 +181,20 @@ export async function mapAlias(query, productId) {
   return { ok: true, productId, title: p.title, aliasesCount: aliases.length };
 }
 
+// ---- load-test runs (posted by k6 handleSummary) ----
+export async function saveLoadTest(run) {
+  const db = await getDb();
+  await db.collection("loadtest_runs").insertOne({ ...run, savedAt: new Date().toISOString() });
+  const old = await db.collection("loadtest_runs").find().sort({ savedAt: -1 }).skip(20).toArray();
+  if (old.length) await db.collection("loadtest_runs").deleteMany({ _id: { $in: old.map((d) => d._id) } });
+  return { ok: true };
+}
+export async function getLoadTests() {
+  const db = await getDb();
+  const runs = await db.collection("loadtest_runs").find().sort({ savedAt: -1 }).limit(10).toArray();
+  return { latest: runs[0] || null, history: runs };
+}
+
 function logSearch(query, store, resultCount, missed) {
   if (!query.trim()) return;
   getDb().then((db) => db.collection("search_logs").insertOne({ query, store, resultCount, missed: !!missed, ts: new Date().toISOString() })).catch((e) => logger.debug("log fail", e.message));

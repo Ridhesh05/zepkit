@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { search, resolveLocation, listStores, listCategories, analytics, mapAlias, logEvent } from "../services/searchService.js";
+import { search, resolveLocation, listStores, listCategories, analytics, mapAlias, logEvent, saveLoadTest, getLoadTests } from "../services/searchService.js";
 import { requireAdmin } from "../middleware/requireAdmin.js";
 
 const router = Router();
@@ -46,6 +46,16 @@ router.get("/admin/analytics", requireAdmin, async (req, res) => {
   } catch (err) {
     return res.status(502).json({ error: err.message });
   }
+});
+
+// k6 posts load-test summaries here; admin dashboard reads them
+router.post("/admin/loadtest", requireAdmin, async (req, res) => {
+  try { return res.json(await saveLoadTest(req.body || {})); }
+  catch (err) { return res.status(502).json({ error: err.message }); }
+});
+router.get("/admin/loadtest", requireAdmin, async (_req, res) => {
+  try { return res.json(await getLoadTests()); }
+  catch (err) { return res.status(502).json({ error: err.message }); }
 });
 
 router.post("/admin/map-alias", requireAdmin, async (req, res) => {
