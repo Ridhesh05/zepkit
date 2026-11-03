@@ -9,7 +9,7 @@ import { ruleOnly, splitTags } from "../services/ai-service/src/tagEngine.js";
 import { resetCollection } from "../infra/typesense/schema.js";
 
 const API = `http://localhost:${config.ports.api}/products`;
-const TARGET = 250;
+const TARGET = 300;
 
 const STORES = [
   { _id: "S1", name: "Mumbai", servicePincodes: ["400001", "400050", "400053", "400069"], geo: { lat: 19.076, lng: 72.877 } },
@@ -51,6 +51,13 @@ const DEFS = [
   { cat: "butter", label: "Butter", brands: ["Amul", "Britannia", "Nutralite"], sizes: ["100g", "500g"], prices: [52, 235] },
   { cat: "tomato", label: "Tamatar", brands: ["Fresh", "Farm", "Organic"], sizes: ["1kg", "500g"], prices: [35, 18] },
   { cat: "cream", label: "Fresh Cream", brands: ["Amul", "Nestle", "Britannia"], sizes: ["200ml", "1L"], prices: [60, 250] },
+  { cat: "dal", label: "Dal", brands: ["Tata", "Fortune", "BB Popular", "Patanjali"], sizes: ["1kg", "500g", "2kg"], prices: [120, 65, 230] },
+  { cat: "cheese", label: "Cheese", brands: ["Amul", "Britannia", "Go", "Dlecta"], sizes: ["200g", "400g"], prices: [99, 185] },
+  { cat: "soyasauce", label: "Soya Sauce", brands: ["Ching's", "Knorr", "Weikfield", "Tops"], sizes: ["200ml", "750ml"], prices: [55, 145] },
+  { cat: "pasta", label: "Pasta", brands: ["Barilla", "Disano", "Borges", "Weikfield"], sizes: ["500g", "1kg"], prices: [120, 210] },
+  { cat: "onion", label: "Pyaz", brands: ["Fresh", "Farm", "Organic"], sizes: ["1kg", "2kg"], prices: [40, 72] },
+  { cat: "tortilla", label: "Nachos", brands: ["Doritos", "Del Monte", "Too Yumm", "Cornitos"], sizes: ["150g", "60g"], prices: [99, 40] },
+  { cat: "pastasauce", label: "Pasta Sauce", brands: ["Del Monte", "Ching's", "Knorr", "Funfoods"], sizes: ["350g", "750g"], prices: [125, 225] },
 ];
 
 const rnd = (n) => Math.floor(Math.random() * n);

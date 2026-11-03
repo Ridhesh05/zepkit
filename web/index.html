@@ -43,8 +43,8 @@
   .loc .k{font-size:11px; color:var(--muted)} .loc .v{font-family:"Outfit"; font-weight:700; font-size:13px}
   .spacer{flex:1}
   .icon-btn{display:grid; place-items:center; width:40px; height:40px; border-radius:12px; background:var(--surface-2); border:1px solid var(--border); color:var(--ink); font-size:17px}
-  .cart-btn{flex:none; align-self:center; position:relative; display:inline-flex; align-items:center; gap:7px; height:38px; padding:0 13px; border-radius:11px; background:var(--primary); color:#fff; border:0; font-family:"Outfit"; font-weight:700; font-size:13.5px; line-height:1; white-space:nowrap}
-  .cart-btn .cnt{background:#fff; color:var(--primary-ink); border-radius:999px; font-size:12px; padding:1px 7px; font-weight:800} .cart-btn.empty{background:var(--surface-2); color:var(--muted)}
+  .cart-btn{flex:none; align-self:center; position:relative; display:inline-flex; align-items:center; gap:5px; height:34px; padding:0 10px; border-radius:10px; background:var(--primary); color:#fff; border:0; font-family:"Outfit"; font-weight:700; font-size:12.5px; line-height:1; white-space:nowrap}
+  .cart-btn .cnt{background:#fff; color:var(--primary-ink); border-radius:999px; font-size:11px; padding:1px 6px; font-weight:800} .cart-btn.empty{background:transparent; color:var(--muted); border:1px solid var(--border)}
   @media(max-width:520px){.cart-btn .lbl{display:none}}
   .ghost{height:40px;padding:0 13px;border-radius:12px;border:1px solid var(--border);background:var(--surface-2);color:var(--ink);font-weight:600;font-size:13px;text-decoration:none;display:inline-flex;align-items:center}
 
@@ -208,9 +208,9 @@
 <script>
 const $=(s)=>document.querySelector(s);
 const money=(n)=>`<span class="rupee">₹</span>${Math.round(n)}`;
-const CAT={salt:{e:"🧂",l:"Salt"},milk:{e:"🥛",l:"Dairy"},atta:{e:"🌾",l:"Atta"},rice:{e:"🍚",l:"Rice"},sugar:{e:"🍬",l:"Sugar"},tea:{e:"🍵",l:"Tea"},biscuit:{e:"🍪",l:"Biscuits"},soap:{e:"🧼",l:"Soap"},shampoo:{e:"🧴",l:"Care"},potato:{e:"🥔",l:"Veggies"},oil:{e:"🛢️",l:"Oil"},bread:{e:"🍞",l:"Bread"},paneer:{e:"🧀",l:"Paneer"},curd:{e:"🥣",l:"Curd"},noodles:{e:"🍜",l:"Noodles"},namkeen:{e:"🥨",l:"Namkeen"},chips:{e:"🍟",l:"Chips"},chocolate:{e:"🍫",l:"Chocolate"},softdrink:{e:"🥤",l:"Drinks"},water:{e:"💧",l:"Water"},detergent:{e:"🧺",l:"Detergent"},toothpaste:{e:"🪥",l:"Oral"},coffee:{e:"☕",l:"Coffee"},ghee:{e:"🫙",l:"Ghee"},honey:{e:"🍯",l:"Honey"},butter:{e:"🧈",l:"Butter"},tomato:{e:"🍅",l:"Tomato"},cream:{e:"🍶",l:"Cream"},generic:{e:"🛒",l:"More"}};
+const CAT={salt:{e:"🧂",l:"Salt"},milk:{e:"🥛",l:"Dairy"},atta:{e:"🌾",l:"Atta"},rice:{e:"🍚",l:"Rice"},sugar:{e:"🍬",l:"Sugar"},tea:{e:"🍵",l:"Tea"},biscuit:{e:"🍪",l:"Biscuits"},soap:{e:"🧼",l:"Soap"},shampoo:{e:"🧴",l:"Care"},potato:{e:"🥔",l:"Veggies"},oil:{e:"🛢️",l:"Oil"},bread:{e:"🍞",l:"Bread"},paneer:{e:"🧀",l:"Paneer"},curd:{e:"🥣",l:"Curd"},noodles:{e:"🍜",l:"Noodles"},namkeen:{e:"🥨",l:"Namkeen"},chips:{e:"🍟",l:"Chips"},chocolate:{e:"🍫",l:"Chocolate"},softdrink:{e:"🥤",l:"Drinks"},water:{e:"💧",l:"Water"},detergent:{e:"🧺",l:"Detergent"},toothpaste:{e:"🪥",l:"Oral"},coffee:{e:"☕",l:"Coffee"},ghee:{e:"🫙",l:"Ghee"},honey:{e:"🍯",l:"Honey"},butter:{e:"🧈",l:"Butter"},tomato:{e:"🍅",l:"Tomato"},cream:{e:"🍶",l:"Cream"},dal:{e:"🫘",l:"Dal"},cheese:{e:"🧀",l:"Cheese"},soyasauce:{e:"🥢",l:"Soy Sauce"},pasta:{e:"🍝",l:"Pasta"},onion:{e:"🧅",l:"Onion"},tortilla:{e:"🌮",l:"Nachos"},pastasauce:{e:"🫙",l:"Sauce"},generic:{e:"🛒",l:"More"}};
 const emoji=(c)=>(CAT[c]?.e)||"🛒";
-const HUE={salt:220,milk:210,atta:38,rice:46,sugar:330,tea:150,biscuit:30,soap:188,shampoo:285,potato:40,oil:48,bread:28,paneer:50,curd:205,noodles:16,namkeen:14,chips:42,chocolate:22,softdrink:350,water:195,detergent:225,toothpaste:172,coffee:24,ghee:44,honey:40,butter:45,tomato:6,cream:35,generic:270};
+const HUE={salt:220,milk:210,atta:38,rice:46,sugar:330,tea:150,biscuit:30,soap:188,shampoo:285,potato:40,oil:48,bread:28,paneer:50,curd:205,noodles:16,namkeen:14,chips:42,chocolate:22,softdrink:350,water:195,detergent:225,toothpaste:172,coffee:24,ghee:44,honey:40,butter:45,tomato:6,cream:35,dal:30,cheese:50,soyasauce:15,pasta:20,onion:310,tortilla:38,pastasauce:8,generic:270};
 const catTint=(c)=>{const h=HUE[c]??270;return `linear-gradient(140deg, color-mix(in srgb, hsl(${h} 90% 58%) 15%, var(--surface)), color-mix(in srgb, hsl(${h} 90% 58%) 32%, var(--surface)))`;};
 const EXAMPLES=["doodh","பால்","paneer butter masala banana hai","mujhe chai peeni hai","amul doodh 60 se kam","pulav khana hai","சோப்பு"];
 const SAMPLE_STORES=[{id:"S1",name:"Andheri",pincodes:["400053"]}];
@@ -324,6 +324,7 @@ let toastT;function toast(m){const t=$("#toast");t.textContent=m;t.classList.add
 
 let searchT;
 $("#search").addEventListener("input",(e)=>{STATE.query=e.target.value.trim();$("#searchClear").classList.toggle("show",!!STATE.query);clearTimeout(searchT);searchT=setTimeout(()=>{doSearch();autocomplete(STATE.query);},260);});
+$("#search").addEventListener("keydown",(e)=>{if(e.key==="Enter"){e.preventDefault();clearTimeout(searchT);$("#aclist").classList.remove("show");doSearch();}});
 $("#search").addEventListener("blur",()=>setTimeout(()=>$("#aclist").classList.remove("show"),200));
 $("#searchClear").onclick=()=>{$("#search").value="";STATE.query="";$("#searchClear").classList.remove("show");$("#aclist").classList.remove("show");doSearch();$("#search").focus();};
 $("#locBtn").onclick=openModal;$("#cartBtn").onclick=openDrawer;$("#cartbarGo").onclick=openDrawer;$("#cartClose").onclick=closeModal;$("#scrim").onclick=closeModal;$("#pinCheck").onclick=checkPin;$("#pinInput").addEventListener("keydown",(e)=>{if(e.key==="Enter")checkPin();});

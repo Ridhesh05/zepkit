@@ -16,7 +16,7 @@ const has = (text, term) => ` ${text} `.includes(` ${term} `);
 const hash = (s) => createHash("sha1").update(s).digest("hex").slice(0, 16);
 
 // Hinglish/English phrases that signal "I want to cook/make this" — gates the LLM-fallback tier.
-const TRIGGER = /\b(banana hai|banani hai|banau|banaun|banaye|bnani hai|bana do|kaise banau|kaise banaye|kaise bnaye|how (?:do i|to) make|recipe (?:of|for)|banane ka tarika)\b/i;
+const TRIGGER = /\b(banana hai|banani hai|bana hai|banau|banaun|banaye|bnani hai|bana do|kaise banau|kaise banaye|kaise bnaye|how (?:do i|to) make|recipe (?:of|for)|banane ka tarika)\b/i;
 
 const dishNameTypos = (t) => (t.length >= 9 ? 2 : t.length >= 6 ? 1 : 0);
 

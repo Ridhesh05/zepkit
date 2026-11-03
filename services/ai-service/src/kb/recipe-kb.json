@@ -19,6 +19,11 @@
       "label": "Aloo Paratha",
       "names": ["aloo paratha", "alu paratha", "aloo parantha"],
       "ingredients": ["potato", "atta", "oil"]
+    },
+    "pav_bhaji": {
+      "label": "Pav Bhaji",
+      "names": ["pav bhaji", "pao bhaji", "pav bhaaji"],
+      "ingredients": ["bread", "potato", "butter", "tomato", "oil"]
     }
   }
 }

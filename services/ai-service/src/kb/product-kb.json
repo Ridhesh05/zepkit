@@ -28,6 +28,13 @@
     "honey": { "hindi": ["shahad", "shehad"], "english": ["honey"], "typos": ["honi", "hony"], "brands": ["dabur", "patanjali", "apis", "zandu"], "all_langs": { "Hindi": ["शहद"] } },
     "butter": { "hindi": ["makhan"], "english": ["butter"], "typos": ["btter", "buttr"], "brands": ["amul", "britannia", "nutralite"], "all_langs": { "Hindi": ["मक्खन"] } },
     "tomato": { "hindi": ["tamatar"], "english": ["tomato", "tomatoes"], "typos": ["tomatoe", "tomaato"], "brands": ["fresh", "farm", "organic"], "all_langs": { "Hindi": ["टमाटर"] } },
-    "cream": { "hindi": ["malai"], "english": ["cream", "fresh cream"], "typos": ["creem", "craem"], "brands": ["amul", "nestle", "britannia"], "all_langs": { "Hindi": ["मलाई"] } }
+    "cream": { "hindi": ["malai"], "english": ["cream", "fresh cream"], "typos": ["creem", "craem"], "brands": ["amul", "nestle", "britannia"], "all_langs": { "Hindi": ["मलाई"] } },
+    "dal": { "hindi": ["dal", "daal", "masoor", "arhar", "moong", "chana dal"], "english": ["lentils", "dal", "pulses"], "typos": ["daal", "dall", "dhal"], "brands": ["tata", "fortune", "bb popular", "patanjali"], "all_langs": { "Hindi": ["दाल"] } },
+    "cheese": { "hindi": ["cheese", "cheez"], "english": ["cheese", "processed cheese", "cheese slices"], "typos": ["chees", "cheeze", "chese"], "brands": ["amul", "britannia", "go", "dlecta"], "all_langs": { "Hindi": ["चीज़"] } },
+    "soyasauce": { "hindi": ["soya sauce", "soy sauce"], "english": ["soy sauce", "soya sauce"], "typos": ["soysauce", "soyasauc"], "brands": ["ching's", "knorr", "weikfield", "tops"], "all_langs": { "Hindi": ["सोया सॉस"] } },
+    "pasta": { "hindi": ["pasta", "macaroni"], "english": ["pasta", "penne", "macaroni", "spaghetti"], "typos": ["psta", "pastaa"], "brands": ["barilla", "disano", "borges", "weikfield"], "all_langs": { "Hindi": ["पास्ता"] } },
+    "onion": { "hindi": ["pyaz", "pyaaz", "kanda"], "english": ["onion", "onions"], "typos": ["onon", "oniun", "piyaz"], "brands": ["fresh", "farm", "organic"], "all_langs": { "Hindi": ["प्याज़"] } },
+    "tortilla": { "hindi": ["tortilla", "nachos"], "english": ["tortilla", "nachos", "taco shells"], "typos": ["tortila", "nacho"], "brands": ["doritos", "del monte", "too yumm", "cornitos"], "all_langs": { "Hindi": ["टॉर्टिला"] } },
+    "pastasauce": { "hindi": ["pasta sauce"], "english": ["pasta sauce", "marinara", "arrabiata", "pesto"], "typos": ["pastasauce", "pasta sause"], "brands": ["del monte", "ching's", "knorr", "funfoods"], "all_langs": { "Hindi": ["पास्ता सॉस"] } }
   }
 }
